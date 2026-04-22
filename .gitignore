@@ -1,0 +1,19 @@
+# Some useless things
+.structurizr
+NOTES.md
+TODO.md
+
+# environments
+.env
+env
+.venv
+venv
+
+# IDE's
+.vscode
+
+# Python
+__pycache__
+
+# The crap
+.egg
