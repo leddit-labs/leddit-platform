@@ -1,0 +1,11 @@
+fastapi==0.136.0
+uvicorn==0.45.0
+strawberry-graphql==0.314.3
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+pydantic==2.10.3
+pydantic-settings==2.5.2
+python-jose==3.3.0
+bcrypt==5.0.0
+redis==5.2.0
+python-multipart==0.0.12
