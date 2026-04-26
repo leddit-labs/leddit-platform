@@ -42,4 +42,4 @@ def delete_post(post_id: str, db: Session = Depends(get_db)):
     post = service.delete_post(db, post_id)
     if not post:
         raise HTTPException(status_code=404)
-    return {"status": "tombstoned"}
+    return {"status": "tombstoned"} #todo maybe return more than this?

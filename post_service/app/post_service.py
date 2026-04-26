@@ -1,12 +1,11 @@
-from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.schemas import PostCreate, PostUpdate
 from app.post_repository import PostRepository
 
-#TODO should probably be some verification in each method. check if user is logged in and all that stuff --> using other microservices
-class PostService:
 
+# TODO should probably be some verification in each method. check if user is logged in and all that stuff --> using other microservices
+class PostService:
     def __init__(self):
         self.repo = PostRepository()
 
@@ -26,18 +25,11 @@ class PostService:
         if not post:
             return None
 
-        return self.repo.update(
-            db,
-            post,
-            update.dict(exclude_unset=True)
-        )
+        return self.repo.update(db, post, update.dict(exclude_unset=True))
 
     def delete_post(self, db: Session, post_id):
         post = self.repo.get(db, post_id)
         if not post:
             return None
 
-        # tombstone
-        post.deleted_at = datetime.now()
-        db.commit()
-        return post # maybe not return whole object?
+        return self.repo.delete(db, post)
