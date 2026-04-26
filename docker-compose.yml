@@ -1,0 +1,34 @@
+services:
+  neo4j_database:
+    image: neo4j:5.22
+    container_name: neo4j_database
+    environment:
+      NEO4J_AUTH: neo4j/leddit123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p leddit123 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  comment-service:
+    build:
+      context: ./services/comment-service
+    container_name: comment-service
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload --reload-dir /app/app
+    env_file:
+      - ./services/comment-service/.env
+    volumes:
+      - ./services/comment-service/app:/app/app
+    ports:
+      - "8003:8003"
+    depends_on:
+      neo4j_database:
+        condition: service_healthy
+
+volumes:
+  neo4j_data:
