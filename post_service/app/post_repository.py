@@ -7,14 +7,15 @@ from app.schemas import PostCreate
 
 class PostRepository:
     def create(self, db: Session, data: PostCreate) -> Post:
-        post = Post(**data)
+        post = Post(**data) # ** means unpacking from dict. mapping it to the Post object. 
         db.add(post)
         db.commit()
         db.refresh(post)
         return post
 
     def get(self, db: Session, post_id):
-        return db.query(Post).filter(Post.id == post_id).first()
+        #todo if tombstones, then return something else? - maybe not smart to return the whole object if tombstoned
+        return db.query(Post).filter(Post.id == post_id).first() # should not use the primary key id here
 
     def list_posts(self, db: Session, skip: int, limit: int):
         return (

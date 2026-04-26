@@ -10,7 +10,7 @@ class PostService:
         self.repo = PostRepository()
 
     def create_post(self, db: Session, data: PostCreate):
-        post = self.repo.create(db, data.dict())
+        post = self.repo.create(db, data)
         return post
 
     def get_post(self, db: Session, post_id):
