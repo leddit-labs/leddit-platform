@@ -6,8 +6,8 @@ from datetime import datetime
 
 class PostCreate(BaseModel):
 	#u_id: UUID
-	#community_id: UUID
-	#author_id: UUID
+	community_id: UUID
+	author_id: UUID
 	title: str
 	content: Optional[str] = None
 	#image: Optional[str] = None
@@ -20,7 +20,7 @@ class PostUpdate(BaseModel):
 
 
 class PostOut(BaseModel):
-	id: UUID
+	id: UUID # should return UUID not id primary key id
 	title: str
 	content: Optional[str]
 	#image: Optional[str]

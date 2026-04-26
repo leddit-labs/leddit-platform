@@ -10,9 +10,11 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 service = PostService()
 
+#todo find a way to define the /posts a global space
 
 @app.post("/posts", response_model=PostOut)
 def create_post(post: PostCreate, db: Session = Depends(get_db)):
+    #TODO should notify the integrity service to check this new post via rabbitMQ
     return service.create_post(db, post)
 
 
@@ -42,4 +44,4 @@ def delete_post(post_id: str, db: Session = Depends(get_db)):
     post = service.delete_post(db, post_id)
     if not post:
         raise HTTPException(status_code=404)
-    return {"status": "tombstoned"} #todo maybe return more than this?
+    return {"status": "tombstoned"} #return the postOUT object but with the deleted_at set true or something?

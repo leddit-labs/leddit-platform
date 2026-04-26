@@ -10,6 +10,8 @@ class PostService:
         self.repo = PostRepository()
 
     def create_post(self, db: Session, data: PostCreate):
+        #create uuid and parse
+
         post = self.repo.create(db, data)
         return post
 
