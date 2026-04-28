@@ -1,0 +1,12 @@
+apisix:
+  node_listen: 9080
+  enable_admin: true
+  admin_key:
+    - name: admin
+      key: leddit-admin-key-change-me # TODO: CHANGE THIS
+      role: admin
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
