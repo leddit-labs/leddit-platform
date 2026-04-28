@@ -8,6 +8,10 @@ from app.models import Post
 
 # TODO should probably be some verification in each method. check if user is logged in and all that stuff --> using other microservices
 
+HAS_BEEN_DELETED_TEXT = (
+    "This post has been deleted"  # this is returned instead of original content/title if the post is tombstoned
+)
+
 
 class PostService:
     def __init__(self):
@@ -29,7 +33,7 @@ class PostService:
         return [self._to_out(p) for p in posts]
 
     def update_post(self, db: Session, post_u_id: UUID, update: PostUpdate) -> PostOut:
-        #TODO should check if the logged in user requesting this update is the user that made the post
+        # TODO should check if the logged in user requesting this update is the user that made the post
         post_to_update = self.repo.get(db, post_u_id)
 
         if not post_to_update:
@@ -43,7 +47,18 @@ class PostService:
         if not post:
             return None
 
-        return self.repo.delete(db, post)
+        deleted_post = self.repo.delete(db, post)
+
+        return self._to_out(deleted_post)
+
+    # helper functions below
 
     def _to_out(self, post: Post) -> PostOut:
-        return PostOut.model_validate(post)
+        data = PostOut.model_validate(post).model_dump()
+
+        if post.deleted_at is not None:
+            data["title"] = HAS_BEEN_DELETED_TEXT
+            data["content"] = HAS_BEEN_DELETED_TEXT
+
+        return data
+

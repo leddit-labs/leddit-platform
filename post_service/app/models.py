@@ -18,5 +18,5 @@ class Post(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now) # maybe make it timezone independant? so it scales better.
     deleted_at = Column(DateTime, nullable=True)
