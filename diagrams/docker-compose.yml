@@ -1,0 +1,28 @@
+# services:
+#   structurizr:
+#     image: structurizr/structurizr:latest
+#     command:
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - ./structurizr:/usr/local/structurizr
+#     user: "${STRUCTURIZR_UID:-0}:${STRUCTURIZR_GID:-0}"
+#     restart: unless-stopped
+
+services:
+  structurizr:
+    image: structurizr/structurizr:latest
+    command: local
+    container_name: leddit-structurizr
+    ports:
+      - "8080:8080"
+    volumes:
+      - structurizr-data:/usr/local/structurizr
+      - ./structurizr/workspace.dsl:/usr/local/structurizr/workspace.dsl:ro
+    environment:
+      PORT: "8080"
+      STRUCTURIZR_WORKSPACE_FILENAME: workspace
+    restart: unless-stopped
+
+volumes:
+  structurizr-data:
