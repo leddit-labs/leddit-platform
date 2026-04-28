@@ -9,7 +9,7 @@ from app.db import Base
 class Post(Base):
     __tablename__ = "posts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     u_id = Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4, index=True)
 
     community_id = Column(UUID(as_uuid=True))
