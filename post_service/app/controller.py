@@ -9,9 +9,6 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 service = PostService()
 
-# todo find a way to define the /posts a global space
-
-
 @router.post("", response_model=PostOut)
 def create_post(post: PostCreate, db: Session = Depends(get_db)):
     # TODO should notify the integrity service to check this new post via rabbitMQ

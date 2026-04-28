@@ -30,7 +30,7 @@ class PostRepository:
     def update(self, db: Session, post: Post, update: PostUpdate) -> Post:
         post_update = update.model_dump(exclude_unset=True)
 
-        #iterates over PostUpdate object fields and overwrites with ne 
+        #iterates over PostUpdate object fields and overwrites with new info
         for key, value in post_update.items():
             setattr(post, key, value)
 
@@ -39,7 +39,7 @@ class PostRepository:
         return post
 
     def delete(self, db: Session, post: Post) -> Post:
-        # use the same timezone for consistency if this microservice is scaled and deployed over different timezones
+        # using the same timezone for consistency if this microservice is scaled and deployed over different timezones
         post.deleted_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(post)
