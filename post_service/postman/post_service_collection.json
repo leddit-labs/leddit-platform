@@ -1,0 +1,395 @@
+{
+  "info": {
+    "_postman_id": "dd6a49b1-03ec-40d6-9734-e2a3a92d9818",
+    "name": "LedditPlatform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48872153",
+    "_collection_link": "https://go.postman.co/collection/48872153-dd6a49b1-03ec-40d6-9734-e2a3a92d9818?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "post_service",
+      "item": [
+        {
+          "name": "get posts paginated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response is an array\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Array contains at least 3 posts\", function () { \r",
+                  "    pm.expect(pm.response.json().length).to.be.at.least(3);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/posts?page=1&size=10",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response includes u_id\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"u_id\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response includes valid u_id\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "\r",
+                  "    //regex snatched from https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid\r",
+                  "    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i\r",
+                  "    pm.expect(jsonData.u_id).to.match(uuidRegex);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Store id, content and title\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.environment.set(\"post_u_id\", jsonData.u_id);\r",
+                  "    pm.environment.set(\"post_old_title\", jsonData.title);\r",
+                  "    pm.environment.set(\"post_old_content\", jsonData.content);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"community_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n  \"author_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n  \"title\": \"this is a crazy title bro\",\r\n  \"content\": \"crazy content omg?\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/posts",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get post by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"u_id matches the post_u_id saved when creating\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.u_id).to.eql(pm.environment.get(\"post_u_id\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"fields are present\"), function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"u_id\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"title\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"content\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"created_at\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"deleted_at\");\r",
+                  "}\r",
+                  "\r",
+                  "pm.test(\"compare old title with received title\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.title).to.eql(pm.environment.get(\"post_old_title\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"compare old content with received content\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.content).to.eql(pm.environment.get(\"post_old_content\"));\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/posts/{{post_u_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_u_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"u_id matches the post_u_id environment variable\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.u_id).to.eql(pm.environment.get(\"post_u_id\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"u_id\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"content\");\r",
+                  "    pm.expect(json).to.have.property(\"created_at\");\r",
+                  "    pm.expect(json).to.have.property(\"deleted_at\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"title is updated to the new value\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.title).to.eql(pm.environment.get(\"post_new_title\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"content is updated to the new value\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.content).to.eql(pm.environment.get(\"post_new_content\"));\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"{{post_new_title}}\",\r\n  \"content\": \"{{post_new_content}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/posts/{{post_u_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_u_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"u_id matches the post_u_id environment variable\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.u_id).to.eql(pm.environment.get(\"post_u_id\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has required fields\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json).to.have.property(\"u_id\");\r",
+                  "    pm.expect(json).to.have.property(\"title\");\r",
+                  "    pm.expect(json).to.have.property(\"content\");\r",
+                  "    pm.expect(json).to.have.property(\"created_at\");\r",
+                  "    pm.expect(json).to.have.property(\"deleted_at\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"check title has been deleted\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.title).to.eql(pm.environment.get(\"HAS BEEN DELETED TEXT\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"check content has been deleted\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.content).to.eql(pm.environment.get(\"HAS BEEN DELETED TEXT\"));\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/posts/{{post_u_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_u_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get deleted post by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"u_id matches the post_u_id saved when creating\", function () {\r",
+                  "    const json = pm.response.json();\r",
+                  "    pm.expect(json.u_id).to.eql(pm.environment.get(\"post_u_id\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"fields are present\"), function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"u_id\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"title\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"content\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"created_at\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"deleted_at\");\r",
+                  "}\r",
+                  "\r",
+                  "pm.test(\"verify title was deleted\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.title).to.eql(pm.environment.get(\"HAS BEEN DELETED TEXT\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"verify content was deleted\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.content).to.eql(pm.environment.get(\"HAS BEEN DELETED TEXT\"));\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/posts/{{post_u_id}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "posts",
+                "{{post_u_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
