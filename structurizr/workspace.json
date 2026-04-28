@@ -5,9 +5,7 @@
   "description" : "Architecture choices: REST for external CRUD, GraphQL for client-shaped reads, gRPC for internal sync, RabbitMQ for async. SOAP intentionally omitted. See notes for details.",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedAgent" : "structurizr/diagrams/1ae6ee0d-7509-441a-98c4-1e94ae62779a",
-  "lastModifiedDate" : "2026-04-22T07:56:34Z",
-  "lastModifiedUser" : "1474880511",
+  "lastModifiedDate" : "2026-04-23T12:07:39Z",
   "model" : {
     "people" : [ {
       "description" : "End user who reads, posts, comments, and votes.",
@@ -614,7 +612,7 @@
       "description" : "A Reddit-like platform",
       "documentation" : {
         "sections" : [ {
-          "content" : "# Protocol choices — rationale\n\nGraphQL:\nexternal edge for aggregated/nested reads (profile pages, feeds with nested  \ndata).  \nUsed at the Identity service (spec'd that way) and could front the frontend.\n\nREST:\nexternal edge for resource-oriented CRUD (posts, comments, communities,  \nnotifications, moderation). Boring, cacheable, correct default.\n\ngRPC:\ninternal service-to-service sync calls where we want strong typing, low  \nlatency, and generated clients (token validation, score reads, integrity checks).\n\nRabbitMQ:\neverything async — events, fanout, saga steps, indexing, notifications, logs.\n\nSOAP:\nNOT used. SOAP fits enterprise/legacy integrations (banking, insurance, HL7).  \nNothing in this platform — a social content app with web/mobile clients and\n\n## How to run it?\n\nRun the structurizr server app in docker:\n\n```bash\ndocker run -it --rm -p 8080:8080 \\\n    -v ~/Documents/EK/leddit/structurizr:/usr/local/structurizr \\\n    structurizr/structurizr local\n```\n",
+          "content" : "# Protocol choices\n\nGraphQL:\nexternal edge for aggregated/nested reads (profile pages, feeds with nested  \ndata).  \nUsed at the Identity service (spec'd that way) and could front the frontend.\n\nREST:\nexternal edge for resource-oriented CRUD (posts, comments, communities,  \nnotifications, moderation). Boring, cacheable, correct default.\n\ngRPC:\ninternal service-to-service sync calls where we want strong typing, low  \nlatency, and generated clients (token validation, score reads, integrity checks).\n\nRabbitMQ:\neverything async — events, fanout, saga steps, indexing, notifications, logs.\n\nSOAP:\nNOT used. SOAP fits enterprise/legacy integrations (banking, insurance, HL7).  \nNothing in this platform — a social content app with web/mobile clients and\n\n## How to run it?\n\nRun the structurizr server app in docker:\n\n```bash\ndocker run -it --rm -p 8080:8080 \\\n    -v ~/app/structurizr:/usr/local/structurizr \\\n    structurizr/structurizr local\n```\n",
           "filename" : "docs.md",
           "format" : "Markdown",
           "order" : 1,
@@ -631,15 +629,14 @@
   },
   "name" : "Leddit Platform",
   "properties" : {
+    "structurizr.inspection.error" : "12",
     "structurizr.inspection.info" : "0",
     "structurizr.inspection.ignore" : "0",
-    "structurizr.inspection.error" : "12",
     "structurizr.inspection.warning" : "0"
   },
   "views" : {
     "configuration" : {
       "lastSavedView" : "Less-fluff-Noautolayout",
-      "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
           "background" : "#c9184a",
@@ -700,13 +697,13 @@
           "tag" : "GraphQL",
           "thickness" : 3
         }, {
+          "color" : "#1168bd",
+          "tag" : "REST",
+          "thickness" : 2
+        }, {
           "color" : "#7209b7",
           "style" : "Dashed",
           "tag" : "gRPC",
-          "thickness" : 2
-        }, {
-          "color" : "#1168bd",
-          "tag" : "REST",
           "thickness" : 2
         } ]
       },

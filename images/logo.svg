@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 150" width="420" height="150">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0800"/>
+      <stop offset="100%" style="stop-color:#2e1100"/>
+    </linearGradient>
+    <linearGradient id="lGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7033"/>
+      <stop offset="100%" style="stop-color:#cc3d00"/>
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7a30"/>
+      <stop offset="100%" style="stop-color:#e03d00"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="iconGlow">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#ff4500" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="3" y="3" width="414" height="144" rx="20" fill="url(#bgGrad)"/>
+  <rect x="3" y="3" width="414" height="144" rx="20" fill="none" stroke="#ff4500" stroke-width="1" stroke-opacity="0.35"/>
+
+  <!-- Mascot: alien snoo-like head -->
+  <!-- Body/head ellipse -->
+  <ellipse cx="65" cy="74" rx="33" ry="35" fill="url(#iconGrad)" filter="url(#iconGlow)"/>
+  <!-- Left antenna -->
+  <line x1="40" y1="46" x2="31" y2="23" stroke="#ff6a20" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="30" cy="19" r="6" fill="#ffb380"/>
+  <!-- Right antenna -->
+  <line x1="90" y1="46" x2="99" y2="23" stroke="#ff6a20" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="100" cy="19" r="6" fill="#ffb380"/>
+  <!-- Eyes (big round white) -->
+  <ellipse cx="51" cy="68" rx="11" ry="12" fill="white"/>
+  <ellipse cx="79" cy="68" rx="11" ry="12" fill="white"/>
+  <!-- Pupils -->
+  <circle cx="52" cy="69" r="6.5" fill="#1a0800"/>
+  <circle cx="80" cy="69" r="6.5" fill="#1a0800"/>
+  <!-- Shine -->
+  <circle cx="54" cy="67" r="2.2" fill="white"/>
+  <circle cx="82" cy="67" r="2.2" fill="white"/>
+  <!-- Mouth / smile -->
+  <path d="M49 86 Q65 100 81 86" stroke="#1a0800" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+  <!-- "L" in brand orange with glow -->
+  <text x="131" y="95" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" fill="#f2ede8">L</text>
+  <!-- "eddit" in off-white -->
+  <text x="172" y="95" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" fill="#f2ede8">eddit</text>
+
+  <!-- Tagline -->
+  <text x="160" y="122" font-family="Georgia, serif" font-size="11.5" letter-spacing="4" fill="#ff6314" opacity="0.65">THE FRONT PAGE</text>
+</svg>
