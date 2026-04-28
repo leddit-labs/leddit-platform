@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -39,9 +41,9 @@ def update_post(post_id: str, update: PostUpdate, db: Session = Depends(get_db))
     return post
 
 
-@app.delete("/posts/{post_id}")
-def delete_post(post_id: str, db: Session = Depends(get_db)):
-    post = service.delete_post(db, post_id)
+@app.delete("/posts/{post_u_id}", response_model=PostOut)
+def delete_post(post_u_id: UUID, db: Session = Depends(get_db)):
+    post = service.delete_post(db, post_u_id)
     if not post:
         raise HTTPException(status_code=404)
-    return {"status": "tombstoned"} #return the postOUT object but with the deleted_at set true or something?
+    return post

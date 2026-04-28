@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class PostCreate(BaseModel):
-	#u_id: UUID
+	#u_id: UUID # u_id is generated in service
 	community_id: UUID
 	author_id: UUID
 	title: str
@@ -14,13 +14,14 @@ class PostCreate(BaseModel):
 
 
 class PostUpdate(BaseModel):
+	
 	title: Optional[str] = None
 	content: Optional[str] = None
 	image: Optional[str] = None
 
 
 class PostOut(BaseModel):
-	id: UUID # should return UUID not id primary key id
+	u_id: UUID
 	title: str
 	content: Optional[str]
 	#image: Optional[str]

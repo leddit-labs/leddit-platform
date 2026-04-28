@@ -1,24 +1,22 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.db import Base
 
 
 class Post(Base):
-	__tablename__ = "posts"
+    __tablename__ = "posts"
 
-	id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-	u_id = Column(UUID(as_uuid=True))
-	community_id = Column(UUID(as_uuid=True))
-	author_id = Column(UUID(as_uuid=True))
+    id = Column(Integer, primary_key=True, index=True)
+    u_id = Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4, index=True)
 
-	title = Column(String, nullable=False)
-	content = Column(Text, nullable=True)
-	#image = Column(String, nullable=True)
+    community_id = Column(UUID(as_uuid=True))
+    author_id = Column(UUID(as_uuid=True))
 
-	created_at = Column(DateTime, default=datetime.utcnow)
-	deleted_at = Column(DateTime, nullable=True)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=True)
 
-	score = Column(String, default="0")
+    created_at = Column(DateTime, default=datetime.now)
+    deleted_at = Column(DateTime, nullable=True)
