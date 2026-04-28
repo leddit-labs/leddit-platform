@@ -19,7 +19,7 @@ workspace "Leddit Platform" "Architecture choices: REST for external CRUD, Graph
 
             // ---------- API Gateway ----------
             //gateway = container "API Gateway" "Routes external traffic, terminates JWT, exposes REST + GraphQL to clients." "Traefik / Kong" "Gateway"
-            gateway = container "API Gateway" "Routes external traffic, validates JWT signature locally (via Identity public key), injects trusted user claims into downstream headers. Exposes REST + GraphQL to clients." "Traefik / Kong / (maybe NGINX ?)" "Gateway"
+            gateway = container "API Gateway" "Routes external traffic, validates JWT signature locally (via Identity public key), injects trusted user claims into downstream headers. Exposes REST + GraphQL to clients." "Apache APISIX" "Gateway"
 
             // ---------- Core services ----------
             identity = container "Identity Service" "Registration, login, JWT issuance, OAuth, profiles, roles." "GraphQL (external) + gRPC (internal)" "Service" {
