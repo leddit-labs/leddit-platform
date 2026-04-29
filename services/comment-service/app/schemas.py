@@ -16,6 +16,7 @@ class CommentUpdate(BaseModel):
 
 class CommentResponse(BaseModel):
     id: int
+    u_id: str
     post_id: str
     parent_id: int | None
     author_id: str

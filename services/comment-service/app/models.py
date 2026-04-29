@@ -5,6 +5,7 @@ from datetime import datetime
 @dataclass
 class Comment:
     id: int
+    u_id: str
     post_id: str
     parent_id: int | None
     author_id: str

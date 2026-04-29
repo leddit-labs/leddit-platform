@@ -1,4 +1,5 @@
 from datetime import datetime, UTC
+from uuid import uuid4
 
 from neo4j import Driver
 
@@ -18,6 +19,7 @@ class CommentRepository:
 
         return Comment(
             id=properties["id"],
+            u_id=properties["u_id"],
             post_id=properties["post_id"],
             parent_id=properties.get("parent_id"),
             author_id=properties["author_id"],
@@ -29,6 +31,7 @@ class CommentRepository:
 
     def create(self, post_id: str, parent_id: int | None, author_id: str, content: str) -> Comment:
         now = datetime.now(UTC).isoformat()
+        u_id = str(uuid4())
 
         query = """
         MERGE (ctr:Counter {name: 'comment_id'})
@@ -37,6 +40,7 @@ class CommentRepository:
         WITH ctr.value AS next_id
         CREATE (c:Comment {
             id: next_id,
+            u_id: $u_id,
             post_id: $post_id,
             parent_id: $parent_id,
             author_id: $author_id,
@@ -54,6 +58,7 @@ class CommentRepository:
         with self.db.session() as session:
             record = session.run(
                 query,
+                u_id=u_id,
                 post_id=post_id,
                 parent_id=parent_id,
                 author_id=author_id,

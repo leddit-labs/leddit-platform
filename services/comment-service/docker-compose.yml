@@ -17,13 +17,13 @@ services:
 
   comment-service:
     build:
-      context: ./services/comment-service
+      context: .
     container_name: comment-service
     command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload --reload-dir /app/app
     env_file:
-      - ./services/comment-service/.env
+      - ./.env
     volumes:
-      - ./services/comment-service/app:/app/app
+      - ./app:/app/app
     ports:
       - "8003:8003"
     depends_on:
