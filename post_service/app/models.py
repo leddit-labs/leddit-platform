@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -18,5 +18,5 @@ class Post(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.now) # maybe make it timezone independant? so it scales better.
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     deleted_at = Column(DateTime, nullable=True)
