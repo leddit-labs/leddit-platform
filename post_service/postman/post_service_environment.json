@@ -1,0 +1,55 @@
+{
+	"id": "bfa1cf76-25f5-437f-989b-4224f8ef87f0",
+	"name": "post-service-environment",
+	"values": [
+		{
+			"key": "BASE_URL",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "post_u_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "post_old_title",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "post_new_title",
+			"value": "",
+			"type": "default",
+			"description": "hardcoded",
+			"enabled": true
+		},
+		{
+			"key": "post_old_content",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "post_new_content",
+			"value": "",
+			"type": "default",
+			"description": "hardcoded",
+			"enabled": true
+		},
+		{
+			"key": "HAS BEEN DELETED TEXT",
+			"value": "",
+			"type": "default",
+			"description": "this is hardcoded in post_service.py",
+			"enabled": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-04-28T18:32:51.538Z",
+	"_postman_exported_using": "Postman/11.91.0"
+}
