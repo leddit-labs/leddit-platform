@@ -29,7 +29,7 @@ class CommentRepository:
             deleted_at=parse_dt(properties.get("deleted_at")),
         )
 
-    def create(self, post_id: str, parent_id: int | None, author_id: str, content: str) -> Comment:
+    def create(self, post_id: str, parent_id: str | None, author_id: str, content: str) -> Comment:
         now = datetime.now(UTC).isoformat()
         u_id = str(uuid4())
 
@@ -50,7 +50,7 @@ class CommentRepository:
             deleted_at: null
         })
         WITH c
-        OPTIONAL MATCH (p:Comment {id: $parent_id})
+        OPTIONAL MATCH (p:Comment {u_id: $parent_id})
         FOREACH (_ IN CASE WHEN p IS NULL THEN [] ELSE [1] END | MERGE (p)-[:HAS_REPLY]->(c))
         RETURN c
         """
@@ -71,6 +71,14 @@ class CommentRepository:
         query = "MATCH (c:Comment {id: $id}) RETURN c"
         with self.db.session() as session:
             record = session.run(query, id=comment_id).single()
+            if record is None:
+                return None
+            return self._to_comment(dict(record["c"]))
+
+    def get_by_u_id(self, comment_u_id: str) -> Comment | None:
+        query = "MATCH (c:Comment {u_id: $u_id}) RETURN c"
+        with self.db.session() as session:
+            record = session.run(query, u_id=comment_u_id).single()
             if record is None:
                 return None
             return self._to_comment(dict(record["c"]))

@@ -10,7 +10,7 @@ class CommentService:
 
     def create_comment(self, payload: CommentCreate):
         if payload.parent_id is not None:
-            parent = self.repository.get_by_id(payload.parent_id)
+            parent = self.repository.get_by_u_id(payload.parent_id)
             if parent is None:
                 raise HTTPException(status_code=400, detail="Parent comment does not exist")
             if parent.post_id != payload.post_id:
@@ -32,10 +32,8 @@ class CommentService:
     def list_comments_for_post(self, post_id: str):
         return self.repository.list_by_post_id(post_id)
 
-    def update_comment(self, comment_id: int, payload: CommentUpdate, actor_user_id: str):
+    def update_comment(self, comment_id: int, payload: CommentUpdate):
         comment = self.get_comment(comment_id)
-        if comment.author_id != actor_user_id:
-            raise HTTPException(status_code=403, detail="Only the author can edit this comment")
         if comment.deleted_at is not None:
             raise HTTPException(status_code=409, detail="Deleted comments cannot be edited")
 

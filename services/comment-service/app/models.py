@@ -7,7 +7,7 @@ class Comment:
     id: int
     u_id: str
     post_id: str
-    parent_id: int | None
+    parent_id: str | None
     author_id: str
     content: str
     created_at: datetime

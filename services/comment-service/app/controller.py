@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends
 from neo4j import Driver
 
 from .database import get_db
@@ -33,10 +33,9 @@ def list_comments(post_id: str, service: CommentService = Depends(get_comment_se
 def update_comment(
     comment_id: int,
     payload: CommentUpdate,
-    x_user_id: str = Header(alias="X-User-Id"),
     service: CommentService = Depends(get_comment_service),
 ):
-    return service.update_comment(comment_id, payload, x_user_id)
+    return service.update_comment(comment_id, payload)
 
 
 @router.delete("/comments/{comment_id}", response_model=CommentResponse)
