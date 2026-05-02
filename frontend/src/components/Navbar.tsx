@@ -13,7 +13,7 @@ export default function Navbar() {
             placeholder="Search..."
             bg="whiteAlpha.200"
             color="white"
-            maxW="600px"
+            maxW="700px"
             mx="auto"
             display="block"
           />
