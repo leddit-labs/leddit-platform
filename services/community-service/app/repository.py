@@ -59,6 +59,24 @@ class CommunityRepository:
         result = await self._session.execute(query)
         return result.scalars().all(), total
 
+    async def update(self, community: Community, **kwargs) -> Community:
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(community, key, value)
+        await self._session.flush()
+        await self._session.refresh(community)
+        return community
+
+    async def delete(self, community: Community) -> None:
+        await self._session.delete(community)
+        await self._session.flush()
+
+    async def get_member_count(self, community_id: uuid.UUID) -> int:
+        result = await self._session.execute(
+            select(func.count()).where(CommunityMember.community_id == community_id)
+        )
+        return result.scalar_one()
+
     # Memberships
 
     async def add_member(
@@ -98,3 +116,89 @@ class CommunityRepository:
             .order_by(CommunityMember.joined_at)
         )
         return result.scalars().all()
+
+    # Moderators
+    async def add_moderator(
+        self,
+        community_id: uuid.UUID,
+        user_id: uuid.UUID,
+        granted_by: uuid.UUID,
+    ) -> CommunityModerator:
+        mod = CommunityModerator(
+            community_id=community_id,
+            user_id=user_id,
+            granted_by=granted_by,
+        )
+        self._session.add(mod)
+        await self._session.flush()
+        await self._session.refresh(mod)
+        return mod
+
+    async def remove_moderator(
+        self, community_id: uuid.UUID, user_id: uuid.UUID
+    ) -> bool:
+        result = await self._session.execute(
+            delete(CommunityModerator).where(
+                CommunityModerator.community_id == community_id,
+                CommunityModerator.user_id == user_id,
+            )
+        )
+        await self._session.flush()
+        return result.rowcount > 0
+
+    async def get_moderator(
+        self, community_id: uuid.UUID, user_id: uuid.UUID
+    ) -> CommunityModerator | None:
+        result = await self._session.execute(
+            select(CommunityModerator).where(
+                CommunityModerator.community_id == community_id,
+                CommunityModerator.user_id == user_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_moderators(
+        self, community_id: uuid.UUID
+    ) -> list[CommunityModerator]:
+        result = await self._session.execute(
+            select(CommunityModerator)
+            .where(CommunityModerator.community_id == community_id)
+            .order_by(CommunityModerator.granted_at)
+        )
+        return result.scalars().all()
+
+    # Rules
+
+    async def create_rule(self, community_id: uuid.UUID, **kwargs) -> CommunityRule:
+        rule = CommunityRule(community_id=community_id, **kwargs)
+        self._session.add(rule)
+        await self._session.flush()
+        await self._session.refresh(rule)
+        return rule
+
+    async def get_rule(self, rule_id: int) -> CommunityRule | None:
+        result = await self._session.execute(
+            select(CommunityRule).where(CommunityRule.id == rule_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def list_rules(self, community_id: uuid.UUID) -> list[CommunityRule]:
+        result = await self._session.execute(
+            select(CommunityRule)
+            .where(CommunityRule.community_id == community_id)
+            .order_by(CommunityRule.position)
+        )
+        return result.scalars().all()
+
+    async def update_rule(self, rule: CommunityRule, **kwargs) -> CommunityRule:
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(rule, key, value)
+        await self._session.flush()
+        await self._session.refresh(rule)
+        return rule
+
+
+async def delete_rule(self, rule: CommunityRule) -> None:
+    await self._session.delete(rule)
+    await self._session.flush()
