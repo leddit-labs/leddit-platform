@@ -17,7 +17,6 @@ class CommunityCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=100)
     slug: str = Field(..., min_length=3, max_length=50)
     description: str | None = Field(None, max_length=1000)
-    is_private: bool = False
 
     @field_validator("slug", mode="before")
     @classmethod
@@ -109,8 +108,7 @@ class RuleResponse(BaseModel):
 # gRPC
 class CommunityExistsResponse(BaseModel):
     exists: bool
-    is_private: bool
-    is_archived: bool
+    is_deleted: bool
     owner_id: uuid.UUID | None
 
 
