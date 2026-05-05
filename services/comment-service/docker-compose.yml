@@ -30,5 +30,15 @@ services:
       neo4j_database:
         condition: service_healthy
 
+  tests:
+    build:
+      context: .
+    command: python -m pytest tests/unit -v --cov=app --cov-report=term-missing
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    env_file:
+      - ./.env
+
 volumes:
   neo4j_data:
