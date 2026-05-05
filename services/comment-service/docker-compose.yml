@@ -30,7 +30,7 @@ services:
       neo4j_database:
         condition: service_healthy
 
-  tests:
+  unit-tests:
     build:
       context: .
     command: python -m pytest tests/unit -v --cov=app --cov-report=term-missing
@@ -39,6 +39,24 @@ services:
       - ./tests:/app/tests
     env_file:
       - ./.env
+
+  integration-tests:
+    build:
+      context: .
+    command: python -m pytest tests/integration -v
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - ./.env
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
 
 volumes:
   neo4j_data:
