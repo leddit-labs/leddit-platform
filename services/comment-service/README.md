@@ -8,7 +8,7 @@ This is the microservice responsible for comments
 docker-compose up --build -d
 ```
 
-## How to run tests
+## How to run unit tests
 
 ```bash
 docker-compose run --rm unit-tests
