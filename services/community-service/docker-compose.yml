@@ -1,0 +1,51 @@
+services:
+  community-service:
+    container_name: community-service
+    build: .
+    ports:
+      - "8003:8003" # REST
+      - "50051:50051" # gRPC
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+
+  postgres:
+    container_name: community-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: leddit
+      POSTGRES_PASSWORD: leddit
+      POSTGRES_DB: community_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leddit -d community_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    container_name: community-rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # Management UI (guest/guest)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
