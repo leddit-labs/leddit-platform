@@ -3,6 +3,7 @@
 import grpc
 import warnings
 
+import community_pb2 as community__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
@@ -22,3 +23,118 @@ if _version_not_supported:
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
+
+
+class CommunityServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.CommunityExists = channel.unary_unary(
+                '/community.CommunityService/CommunityExists',
+                request_serializer=community__pb2.CommunityExistsRequest.SerializeToString,
+                response_deserializer=community__pb2.CommunityExistsResponse.FromString,
+                _registered_method=True)
+        self.CheckMembership = channel.unary_unary(
+                '/community.CommunityService/CheckMembership',
+                request_serializer=community__pb2.MembershipCheckRequest.SerializeToString,
+                response_deserializer=community__pb2.MembershipCheckResponse.FromString,
+                _registered_method=True)
+
+
+class CommunityServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def CommunityExists(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CheckMembership(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_CommunityServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'CommunityExists': grpc.unary_unary_rpc_method_handler(
+                    servicer.CommunityExists,
+                    request_deserializer=community__pb2.CommunityExistsRequest.FromString,
+                    response_serializer=community__pb2.CommunityExistsResponse.SerializeToString,
+            ),
+            'CheckMembership': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckMembership,
+                    request_deserializer=community__pb2.MembershipCheckRequest.FromString,
+                    response_serializer=community__pb2.MembershipCheckResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'community.CommunityService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('community.CommunityService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class CommunityService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def CommunityExists(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/community.CommunityService/CommunityExists',
+            community__pb2.CommunityExistsRequest.SerializeToString,
+            community__pb2.CommunityExistsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CheckMembership(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/community.CommunityService/CheckMembership',
+            community__pb2.MembershipCheckRequest.SerializeToString,
+            community__pb2.MembershipCheckResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

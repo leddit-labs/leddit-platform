@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package community;
+
+service CommunityService {
+  rpc CommunityExists (CommunityExistsRequest) returns (CommunityExistsResponse);
+  rpc CheckMembership (MembershipCheckRequest) returns (MembershipCheckResponse);
+}
+
+message CommunityExistsRequest {
+  string community_id = 1;
+}
+
+message CommunityExistsResponse {
+  bool exists = 1;
+  bool is_deleted = 2;
+  string owner_id = 3;
+}
+
+message MembershipCheckRequest {
+  string community_id = 1;
+  string user_id = 2;
+}
+
+message MembershipCheckResponse {
+  bool is_member = 1;
+  bool is_moderator = 2;
+  bool is_owner = 3;
+}
