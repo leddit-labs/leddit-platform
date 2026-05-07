@@ -1,2 +1,10 @@
-routes: []
+routes:
+  - uri: /community-service/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "community-service:8000": 1
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/community-service(.*)$", "$1"]
 #END
