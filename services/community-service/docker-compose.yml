@@ -1,0 +1,69 @@
+# services:
+#   community-service:
+#     build: .
+#     ports:
+#       - "8000:8000"
+#     networks:
+#       - leddit-network
+#
+# apisix:
+#   image: apache/apisix:3.9.1-debian
+#   ports:
+#     - "9080:9080" # proxy
+#   volumes:
+#     - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml
+#     - ./apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+#   depends_on:
+#     - community-service
+
+services:
+  community-service:
+    build: .
+    ports:
+      - "8000:8000"
+    networks:
+      - leddit-network
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://community:community@db:5432/community
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: community
+      POSTGRES_PASSWORD: community
+      POSTGRES_DB: community
+    ports:
+      - "5432:5432"
+    networks:
+      - leddit-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U community"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # apisix:
+  #   image: apache/apisix:3.9.1-debian
+  #   ports:
+  #     - "9080:9080"
+  #   networks:
+  #     - leddit-network
+  #   volumes:
+  #     - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml
+  #     - ./apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+  #   depends_on:
+  #     - community-service
+  #
+volumes:
+  pgdata:
+
+networks:
+  leddit-network:
+    external: true

@@ -21,7 +21,7 @@ plugins, and upstreams.
 
 ### Auth in one place
 
-with the `openid-connect` plugin, APISIX can validate the Keycloak JWT on every
+With the `openid-connect` plugin, APISIX can validate the Keycloak JWT on every
 request before it reaches our services.
 
 Therefore, our individual services don't need token validation implemented.
@@ -32,6 +32,19 @@ Therefore, our individual services don't need token validation implemented.
   - and metrics for Prometheus
 - Load balancing (if KEDA doesn't already do this for us)
 - rate limiting
+
+## HOW TO USE
+
+```yaml
+- uri: /community-service/*
+  upstream:
+    type: roundrobin
+    nodes:
+      "community-service:8000": 1
+  plugins:
+    proxy-rewrite:
+      regex_uri: ["^/community-service(.*)$", "$1"]
+```
 
 ## Architecture Decisions
 
