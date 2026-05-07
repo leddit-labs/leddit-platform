@@ -15,6 +15,9 @@ gateway-up: network
 community-up: network
 	cd services/community-service && docker compose up --build
 
+rabbit-up: network
+	cd rabbitmq && docker compose up -d
+
 up: gateway-up community-up
 
 down:
