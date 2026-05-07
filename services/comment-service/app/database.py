@@ -18,7 +18,6 @@ def get_db():
 
 def init_db() -> None:
     with driver.session() as session:
-        session.run("MATCH (c:Comment) WHERE c.u_id IS NULL SET c.u_id = randomUUID()")
         session.run(
             "CREATE CONSTRAINT comment_id_unique IF NOT EXISTS FOR (c:Comment) REQUIRE c.id IS UNIQUE"
         )
