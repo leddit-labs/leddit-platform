@@ -19,7 +19,7 @@ resource "keycloak_openid_client" "leddit_frontend" {
 
   access_type = "PUBLIC"
   standard_flow_enabled = true
-  direct_access_grants_enabled = false
+  direct_access_grants_enabled = true #made this true for testing purposes
 
   valid_redirect_uris = [
     "http://localhost:3000/*",
@@ -40,7 +40,7 @@ resource "keycloak_openid_client" "leddit_api" {
   access_type = "CONFIDENTIAL"
   service_accounts_enabled = true
   standard_flow_enabled = false
-  direct_access_grants_enabled = false
+  direct_access_grants_enabled = true #i enabled this for postman testing
 }
 
 resource "keycloak_user" "test_user" {
