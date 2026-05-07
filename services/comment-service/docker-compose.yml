@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  neo4j_database:
+    image: neo4j:5.22
+    container_name: neo4j_database
+    environment:
+      NEO4J_AUTH: neo4j/leddit123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p leddit123 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  comment-service:
+    build: .
+    container_name: comment-service
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload --reload-dir /app/app
+    depends_on:
+      neo4j_database:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    ports:
+      - "8003:8003"
+    networks:
+      - leddit-network
+    volumes:
+      - .:/app
+
+  unit-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comment-service-unit-tests
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: pytest -q tests/unit
+    environment:
+      PYTHONUNBUFFERED: 1
+    profiles:
+      - test
+
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comment-service-integration-tests
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: pytest -q tests/integration
+    environment:
+      PYTHONUNBUFFERED: 1
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    profiles:
+      - test
+
+volumes:
+  neo4j_data:
+
+networks:
+  leddit-network:
+    external: true
