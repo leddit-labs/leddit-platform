@@ -19,8 +19,8 @@
 services:
   community-service:
     build: .
-    ports:
-      - "8000:8000"
+    # ports: - not needed because of apisix
+    #   - "8000:8000" - not needed because of apisix
     networks:
       - leddit-network
     env_file:
