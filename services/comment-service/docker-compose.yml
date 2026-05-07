@@ -28,6 +28,8 @@ services:
       - ./.env
     ports:
       - "8003:8003"
+    networks:
+      - leddit-network
     volumes:
       - .:/app
 
@@ -64,3 +66,7 @@ services:
 
 volumes:
   neo4j_data:
+
+networks:
+  leddit-network:
+    external: true
