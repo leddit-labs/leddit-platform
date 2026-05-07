@@ -30,6 +30,8 @@ services:
     ports:
       - "8080:8080"
       - "9000:9000"
+    networks:
+      - leddit-network
     command: start-dev
     depends_on:
       keycloak-db:
@@ -43,3 +45,7 @@ services:
 
 volumes:
   keycloak_db_data:
+
+networks:
+  leddit-network:
+    external: true

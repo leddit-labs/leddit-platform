@@ -47,6 +47,8 @@ resource "keycloak_user" "test_user" {
   realm_id   = keycloak_realm.leddit.id
   username   = "testuser"
   email      = "test@leddit.local"
+  first_name = "Test"
+  last_name  = "User" 
   enabled    = true
   email_verified = true
 
