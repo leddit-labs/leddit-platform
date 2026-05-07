@@ -1,19 +1,18 @@
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pytest
 from neo4j import GraphDatabase
 from fastapi.testclient import TestClient
 from testcontainers.neo4j import Neo4jContainer
 
-from app.database import get_db
-from app.main import app
-
-
 SERVICE_ROOT = Path(__file__).resolve().parents[2]
 if str(SERVICE_ROOT) not in sys.path:
     sys.path.insert(0, str(SERVICE_ROOT))
+
+from app.database import get_db
+from app.main import app
 
 class DockerFriendlyNeo4jContainer(Neo4jContainer):
     def get_container_host_ip(self) -> str:

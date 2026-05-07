@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   neo4j_database:
     image: neo4j:5.22
@@ -16,47 +18,49 @@ services:
       retries: 10
 
   comment-service:
-    build:
-      context: .
+    build: .
     container_name: comment-service
     command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload --reload-dir /app/app
-    env_file:
-      - ./.env
-    volumes:
-      - ./app:/app/app
-    ports:
-      - "8003:8003"
     depends_on:
       neo4j_database:
         condition: service_healthy
+    env_file:
+      - ./.env
+    ports:
+      - "8003:8003"
+    volumes:
+      - .:/app
 
   unit-tests:
     build:
       context: .
-    command: python -m pytest tests/unit -v --cov=app --cov-report=term-missing
+      dockerfile: Dockerfile
+    container_name: comment-service-unit-tests
+    working_dir: /app
     volumes:
-      - ./app:/app/app
-      - ./tests:/app/tests
-    env_file:
-      - ./.env
+      - .:/app
+    command: pytest -q tests/unit
+    environment:
+      PYTHONUNBUFFERED: 1
+    profiles:
+      - test
 
   integration-tests:
     build:
       context: .
-    command: python -m pytest tests/integration -v
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      dockerfile: Dockerfile
+    container_name: comment-service-integration-tests
+    working_dir: /app
     volumes:
-      - ./app:/app/app
-      - ./tests:/app/tests
+      - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
-    env_file:
-      - ./.env
+    command: pytest -q tests/integration
     environment:
-      DOCKER_HOST: unix:///var/run/docker.sock
-      TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
-      TESTCONTAINERS_RYUK_DISABLED: "true"
+      PYTHONUNBUFFERED: 1
       TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    profiles:
+      - test
 
 volumes:
   neo4j_data:
