@@ -18,3 +18,13 @@ This makes it idempotent.
 ## GUI
 
 See `localhsot:15672` with username `guest` and password `guest`
+
+## Troubleshooting
+
+Is rabbit alive?
+
+```bash
+curl -u guest:guest http://localhost:15672/api/overview
+```
+
+json blab = good
