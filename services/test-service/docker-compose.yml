@@ -1,0 +1,6 @@
+services:
+  test-service:
+    build: .
+    container_name: test-service
+    ports:
+      - "8015:8015"
