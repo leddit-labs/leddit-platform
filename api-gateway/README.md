@@ -35,6 +35,8 @@ Therefore, our individual services don't need token validation implemented.
 
 ## HOW TO USE
 
+1 example route for community-service:
+
 ```yaml
 - uri: /community-service/*
   upstream:
@@ -44,6 +46,14 @@ Therefore, our individual services don't need token validation implemented.
   plugins:
     proxy-rewrite:
       regex_uri: ["^/community-service(.*)$", "$1"]
+```
+
+Other routes could be:
+
+```
+/community-service/communities
+/post-service/posts
+/comment-service/comments
 ```
 
 ## Architecture Decisions
