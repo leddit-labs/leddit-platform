@@ -3,6 +3,9 @@
 NOTES.md
 TODO.md
 
+.terraform*
+*.tfstate
+
 # environments
 .env
 env
