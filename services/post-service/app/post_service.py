@@ -5,12 +5,11 @@ from app.post_repository import PostRepository
 
 from app.schemas import PostCreate, PostOut, PostUpdate
 from app.models import Post
+from app.messaging import publish_event
 
 # TODO should probably be some verification in each method. check if user is logged in and all that stuff --> using other microservices
 
-HAS_BEEN_DELETED_TEXT = (
-    "This post has been deleted"  # this is returned instead of original content/title if the post is tombstoned
-)
+HAS_BEEN_DELETED_TEXT = "This post has been deleted"  # this is returned instead of original content/title if the post is tombstoned
 
 
 class PostService:
@@ -19,6 +18,17 @@ class PostService:
 
     def create_post(self, db: Session, data: PostCreate):
         post = self.repo.create(db, data)
+        # OBS: We should propably make some transactional stuff here
+        # If rabbit down, then bad (raises exception)
+        publish_event(
+            "post_created",
+            {
+                "u_id": str(post.u_id),
+                "community_id": str(post.community_id),
+                "author_id": str(post.author_id),
+                "title": post.title,
+            },
+        )
         return self._to_out(post)
 
     def get_post(self, db: Session, post_u_id):
@@ -61,4 +71,3 @@ class PostService:
             data["content"] = HAS_BEEN_DELETED_TEXT
 
         return data
-

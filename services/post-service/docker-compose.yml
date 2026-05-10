@@ -1,6 +1,6 @@
 services:
   #this post-db below should probably not be here since it should be able to be scaled independently??? idk man
-  db:
+  post-db:
     image: postgres:15
     container_name: post-db
     restart: always
@@ -11,13 +11,16 @@ services:
     networks:
       - leddit-network
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - post_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d posts_db"]
 
-  api:
+  post-service:
     build: .
     container_name: post-service
     depends_on:
-      - db
+      post-db:
+        condition: service_healthy
     env_file:
       - .env
     ports:
@@ -28,7 +31,7 @@ services:
       - .:/app
 
 volumes:
-  postgres_data:
+  post_db_data:
 
 networks:
   leddit-network:
