@@ -20,15 +20,16 @@ class PostService:
         post = self.repo.create(db, data)
         # OBS: We should propably make some transactional stuff here
         # If rabbit down, then bad (raises exception)
-        publish_event(
-            "post_created",
-            {
-                "u_id": str(post.u_id),
-                "community_id": str(post.community_id),
-                "author_id": str(post.author_id),
-                "title": post.title,
-            },
-        )
+        if post:
+            publish_event(
+                "post_created",
+                {
+                    "u_id": str(post.u_id),
+                    "community_id": str(post.community_id),
+                    "author_id": str(post.author_id),
+                    "title": post.title,
+                },
+            )
         return self._to_out(post)
 
     def get_post(self, db: Session, post_u_id):
