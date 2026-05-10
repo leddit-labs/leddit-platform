@@ -1,0 +1,7 @@
+fastapi>=0.104.0
+uvicorn[standard]
+sqlalchemy[asyncio]>=2.0
+asyncpg
+python-jose[cryptography]
+httpx
+pydantic-settings

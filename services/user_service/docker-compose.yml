@@ -1,0 +1,45 @@
+services:
+  user-db:
+    image: postgres:16-alpine
+    container_name: leddit-user-db
+    environment:
+      POSTGRES_DB: leddit
+      POSTGRES_USER: leddit
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-leddit}
+    ports:
+      - "5434:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - leddit-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leddit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build: .
+    container_name: leddit-user-service
+    environment:
+      DATABASE_URL: postgresql+asyncpg://leddit:${USER_DB_PASSWORD:-leddit}@user-db:5432/leddit
+      KEYCLOAK_URL: http://host.docker.internal:8080
+      KEYCLOAK_REALM: leddit
+      KEYCLOAK_CLIENT_ID: leddit-api
+    ports:
+      - "8001:8001"
+    networks:
+      - leddit-network
+    volumes:
+      - ./app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+volumes:
+  user_db_data:
+
+networks:
+  leddit-network:
+    external: true
