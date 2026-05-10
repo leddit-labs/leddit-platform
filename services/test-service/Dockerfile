@@ -14,11 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY pyproject.toml uv.lock ./
 
-RUN pip install --no-cache-dir uv \
-  && uv sync --no-cache
+RUN pip install uv
+RUN uv sync --frozen
 
-# RUN uv sync
-
-COPY app ./app
+COPY . .
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

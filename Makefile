@@ -6,6 +6,9 @@ COMPOSE = docker compose \
 
 .PHONY: build clean down network ps gateway-up
 
+# -------------------------
+# HELPERS
+# -------------------------
 network:
 	docker network inspect leddit-network >/dev/null 2>&1 || docker network create leddit-network
 
@@ -16,7 +19,7 @@ gateway-up: network
 	cd api-gateway && docker compose up -d
 
 community-up: network
-	cd services/community-service && docker compose up --build
+	cd services/community-service && docker compose up -d --build
 
 rabbit-up: network
 	cd rabbitmq && docker compose up -d
@@ -43,3 +46,4 @@ down: gateway-down community-down rabbit-down
 clean:
 	cd services/community-service && docker compose down --remove-orphans
 	cd api-gateway && docker compose down --remove-orphans
+

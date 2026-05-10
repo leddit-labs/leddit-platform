@@ -1,0 +1,12 @@
+services:
+  test-service:
+    build: .
+    container_name: test-service
+    ports:
+      - "8015:8000"
+    networks:
+      - leddit-network
+
+networks:
+  leddit-network:
+    external: true
