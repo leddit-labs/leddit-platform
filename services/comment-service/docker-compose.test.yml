@@ -1,0 +1,31 @@
+services:
+  unit-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comment-service-unit-tests
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: pytest -q tests/unit
+    environment:
+      PYTHONUNBUFFERED: 1
+    profiles:
+      - test
+
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comment-service-integration-tests
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: pytest -q tests/integration
+    environment:
+      PYTHONUNBUFFERED: 1
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    profiles:
+      - test

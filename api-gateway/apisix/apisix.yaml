@@ -1,13 +1,44 @@
 routes:
-  - uri: /communities*
+  - id: community-service-v1
+    uri: /api/v1/communities*
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/communities(.*)"
+          - "/communities$1"
     upstream:
       type: roundrobin
       nodes:
         "community-service:8000": 1
 
-  - uri: /posts*
+  - id: post-service-v1
+    uri: /api/v1/posts*
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/posts(.*)"
+          - "/posts$1"
     upstream:
       type: roundrobin
       nodes:
         "post-service:8000": 1
+
+  - id: comment-service-v1
+    uri: /api/v1/comments*
+    upstream:
+      type: roundrobin
+      nodes:
+        "comment-service:8000": 1
+
+  - id: comment-service-post-comments-v1
+    uri: /api/v1/posts/*/comments
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/posts/(.*)/comments"
+          - "/api/v1/posts/$1/comments"
+    upstream:
+      type: roundrobin
+      nodes:
+        "comment-service:8000": 1
 #END
