@@ -3,7 +3,7 @@ version: "3.9"
 services:
   neo4j_database:
     image: neo4j:5.22
-    container_name: neo4j_database
+    container_name: comment-db
     environment:
       NEO4J_AUTH: neo4j/leddit123
     ports:
@@ -12,7 +12,8 @@ services:
     volumes:
       - neo4j_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p leddit123 'RETURN 1' || exit 1"]
+      test:
+        ["CMD-SHELL", "cypher-shell -u neo4j -p leddit123 'RETURN 1' || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -70,3 +71,4 @@ volumes:
 networks:
   leddit-network:
     external: true
+

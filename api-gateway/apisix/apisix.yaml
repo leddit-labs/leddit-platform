@@ -4,4 +4,10 @@ routes:
       type: roundrobin
       nodes:
         "community-service:8000": 1
+
+  - uri: /posts*
+    upstream:
+      type: roundrobin
+      nodes:
+        "post-service:8000": 1
 #END
