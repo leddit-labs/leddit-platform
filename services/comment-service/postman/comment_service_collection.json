@@ -1,0 +1,496 @@
+{
+  "info": {
+    "_postman_id": "8dc076f8-0779-4a85-b2e4-8a4b85878ff0",
+    "name": "comment-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48669817",
+    "_collection_link": "https://go.postman.co/collection/48669817-8dc076f8-0779-4a85-b2e4-8a4b85878ff0?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "create comment without parameters",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 422 (validation error)\", function () {\r",
+              "  pm.response.to.have.status(422);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response includes validation errors array\", function () {\r",
+              "  const jsonData = pm.response.json();\r",
+              "  pm.expect(jsonData).to.have.property(\"detail\");\r",
+              "  pm.expect(jsonData.detail).to.be.an(\"array\").that.is.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/comments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response includes id\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"id\");\r",
+              "    pm.expect(jsonData.id).to.be.a(\"number\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Store id in variable\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.environment.set(\"commentId\", jsonData.id);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Store post_id in variable\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.environment.set(\"postId\", jsonData.post_id);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"post_id\": \"post-1\",\r\n  \"author_id\": \"user-1\",\r\n  \"content\": \"{{content}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/comments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", () => {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response id matches stored variable\", () => {\r",
+              "    pm.expect(data).to.have.property(\"id\").that.equals(pm.variables.get(\"commentId\"));\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Required fields exist and are correct type\", () => {\r",
+              "  pm.expect(data).to.have.property(\"u_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"post_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"author_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"content\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"created_at\").that.is.a(\"string\");\r",
+              "  pm.expect(!isNaN(Date.parse(data.created_at)), \"created_at is a valid date\").to.be.true;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Optional nullable fields have valid types when present\", () => {\r",
+              "  if (data.parent_id !== null && data.parent_id !== undefined) pm.expect(data.parent_id).to.be.a(\"string\");\r",
+              "  if (data.updated_at !== null && data.updated_at !== undefined) {\r",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.updated_at)), \"updated_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "  if (data.deleted_at !== null && data.deleted_at !== undefined) {\r",
+              "    pm.expect(data.deleted_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.deleted_at)), \"deleted_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/comments/{{commentId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get alll comments for postId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();\r",
+              "const expectedPostId = pm.variables.get(\"postId\");\r",
+              "\r",
+              "pm.test(\"Status code is 200\", () => {\r",
+              "  pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response is an array\", () => {\r",
+              "  pm.expect(data).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Each comment has the correct post_id\", () => {\r",
+              "  if (expectedPostId) {\r",
+              "    data.forEach(comment => {\r",
+              "      pm.expect(comment).to.have.property(\"post_id\", expectedPostId);\r",
+              "    });\r",
+              "  }\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Each comment has the required fields\", () => {\r",
+              "  data.forEach(comment => {\r",
+              "    pm.expect(comment).to.have.property(\"id\").that.is.a(\"number\");\r",
+              "    pm.expect(comment).to.have.property(\"u_id\").that.is.a(\"string\");\r",
+              "    pm.expect(comment).to.have.property(\"post_id\").that.is.a(\"string\");\r",
+              "    pm.expect(comment).to.have.property(\"author_id\").that.is.a(\"string\");\r",
+              "    pm.expect(comment).to.have.property(\"content\").that.is.a(\"string\");\r",
+              "    pm.expect(comment).to.have.property(\"created_at\").that.is.a(\"string\");\r",
+              "  });\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Each comment has valid nullable timestamp fields\", () => {\r",
+              "  data.forEach(comment => {\r",
+              "    if (comment.parent_id !== null && comment.parent_id !== undefined) {\r",
+              "      pm.expect(comment.parent_id).to.be.a(\"string\");\r",
+              "    }\r",
+              "\r",
+              "    if (comment.updated_at !== null && comment.updated_at !== undefined) {\r",
+              "      pm.expect(comment.updated_at).to.be.a(\"string\");\r",
+              "      pm.expect(!isNaN(Date.parse(comment.updated_at)), \"updated_at is a valid date\").to.be.true;\r",
+              "    }\r",
+              "\r",
+              "    if (comment.deleted_at !== null && comment.deleted_at !== undefined) {\r",
+              "      pm.expect(comment.deleted_at).to.be.a(\"string\");\r",
+              "      pm.expect(!isNaN(Date.parse(comment.deleted_at)), \"deleted_at is a valid date\").to.be.true;\r",
+              "    }\r",
+              "  });\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/posts/{{postId}}/comments",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "posts",
+            "{{postId}}",
+            "comments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update comment without parameters",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 422 (validation error)\", function () {\r",
+              "    pm.response.to.have.status(422);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response includes validation errors\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"detail\");\r",
+              "    pm.expect(jsonData.detail).to.be.an(\"array\");\r",
+              "    pm.expect(jsonData.detail[0]).to.have.property(\"msg\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/comments/{{commentId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", () => {\r",
+              "  pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response includes id\", () => {\r",
+              "  pm.expect(data).to.be.an(\"object\");\r",
+              "  pm.expect(data).to.have.property(\"id\");\r",
+              "  pm.expect(data.id).to.be.a(\"number\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Required fields exist and are correct type\", () => {\r",
+              "  pm.expect(data).to.have.property(\"u_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"post_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"author_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"content\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"created_at\").that.is.a(\"string\");\r",
+              "  pm.expect(!isNaN(Date.parse(data.created_at)), \"created_at is a valid date\").to.be.true;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Optional nullable fields have valid types when present\", () => {\r",
+              "  if (data.parent_id !== null && data.parent_id !== undefined) {\r",
+              "    pm.expect(data.parent_id).to.be.a(\"string\");\r",
+              "  }\r",
+              "  if (data.updated_at !== null && data.updated_at !== undefined) {\r",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.updated_at)), \"updated_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "  if (data.deleted_at !== null && data.deleted_at !== undefined) {\r",
+              "    pm.expect(data.deleted_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.deleted_at)), \"deleted_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "});\r",
+              "\r",
+              "pm.test(\"content is updated to the new value\", function () {\r",
+              "  pm.expect(data.content).to.eql(pm.environment.get(\"content_updated\"));\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"content\": \"{{content_updated}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/comments/{{commentId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", () => {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response id matches stored variable\", () => {\r",
+              "    pm.expect(data).to.have.property(\"id\").that.equals(pm.variables.get(\"commentId\"));\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Required fields exist and are correct type\", () => {\r",
+              "  pm.expect(data).to.have.property(\"u_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"post_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"author_id\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"content\").that.is.a(\"string\");\r",
+              "  pm.expect(data).to.have.property(\"created_at\").that.is.a(\"string\");\r",
+              "  pm.expect(!isNaN(Date.parse(data.created_at)), \"created_at is a valid date\").to.be.true;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Optional nullable fields have valid types when present\", () => {\r",
+              "  if (data.parent_id !== null && data.parent_id !== undefined) pm.expect(data.parent_id).to.be.a(\"string\");\r",
+              "  if (data.updated_at !== null && data.updated_at !== undefined) {\r",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.updated_at)), \"updated_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "  if (data.deleted_at !== null && data.deleted_at !== undefined) {\r",
+              "    pm.expect(data.deleted_at).to.be.a(\"string\");\r",
+              "    pm.expect(!isNaN(Date.parse(data.deleted_at)), \"deleted_at is a valid date\").to.be.true;\r",
+              "  }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/comments/{{commentId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
