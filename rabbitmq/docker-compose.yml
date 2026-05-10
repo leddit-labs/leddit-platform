@@ -6,6 +6,8 @@ services:
     ports:
       - "5672:5672" # AMQP
       - "15672:15672" # Management UI
+    networks:
+      - leddit-network
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
