@@ -1,0 +1,35 @@
+services:
+
+  vote-db:
+    image: postgres:15
+    container_name: vote-db
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5435:5432"
+    networks:
+      - leddit-network
+    volumes:
+      - vote_db_data:/var/lib/postgresql/data
+
+  vote-service:
+    build: .
+    container_name: vote-service
+    depends_on:
+      - vote-db
+    env_file:
+      - .env
+    ports:
+      - "8004:8004"
+    networks:
+      - leddit-network
+    volumes:
+      - .:/app
+
+volumes:
+  vote_db_data:
+
+networks:
+  leddit-network:
+    external: true
