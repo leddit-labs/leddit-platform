@@ -50,7 +50,7 @@ class VoteService:
         else:
             vote = PostVote(
                 post_u_id=post_u_id,
-                user_u_id=data.user_u_id,
+                user_u_id=data.user_id,
                 value=data.value,
             )
 
