@@ -1,14 +1,8 @@
 from uuid import UUID
 
-from fastapi import (
-    APIRouter,
-    Depends,
-)
-
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from app.db import get_db
-
 from app.vote_service import VoteService
 
 from app.schemas import (
@@ -25,9 +19,6 @@ router = APIRouter(
 service = VoteService()
 
 
-# POST
-
-
 @router.post(
     "/posts/{post_u_id}",
     response_model=PostVoteOut,
@@ -42,9 +33,6 @@ def vote_post(
         post_u_id,
         vote,
     )
-
-
-# COMMENT
 
 
 @router.post(

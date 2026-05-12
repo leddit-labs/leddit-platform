@@ -30,7 +30,7 @@ class VoteService:
         existing_vote = self.repo.get_post_vote(
             db,
             post_u_id,
-            data.user_u_id,
+            data.user_id,
         )
 
         old_value = 0
@@ -105,7 +105,7 @@ class VoteService:
         else:
             vote = CommentVote(
                 comment_u_id=comment_u_id,
-                user_u_id=data.user_u_id,
+                user_u_id=data.user_id,
                 value=data.value,
             )
 

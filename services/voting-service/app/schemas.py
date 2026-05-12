@@ -5,7 +5,7 @@ from pydantic import BaseModel, field_validator
 
 
 class VoteCreate(BaseModel):
-    user_u_id: UUID
+    user_id: UUID
     value: int
 
     @field_validator("value")
@@ -19,8 +19,8 @@ class VoteCreate(BaseModel):
 class PostVoteOut(BaseModel):
     u_id: UUID
 
-    post_u_id: UUID
-    user_u_id: UUID
+    post_id: UUID
+    user_id: UUID
 
     value: int
 
@@ -33,8 +33,8 @@ class PostVoteOut(BaseModel):
 class CommentVoteOut(BaseModel):
     u_id: UUID
 
-    comment_u_id: UUID
-    user_u_id: UUID
+    comment_id: UUID
+    user_id: UUID
 
     value: int
 

@@ -17,8 +17,8 @@ class VoteRepository:
         return (
             db.query(PostVote)
             .filter(
-                PostVote.post_u_id == post_u_id,
-                PostVote.user_u_id == user_u_id,
+                PostVote.post_id == post_u_id,
+                PostVote.user_id == user_u_id,
             )
             .first()
         )
@@ -44,8 +44,8 @@ class VoteRepository:
         return (
             db.query(CommentVote)
             .filter(
-                CommentVote.comment_u_id == comment_u_id,
-                CommentVote.user_u_id == user_u_id,
+                CommentVote.comment_id == comment_u_id,
+                CommentVote.user_id == user_u_id,
             )
             .first()
         )

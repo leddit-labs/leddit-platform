@@ -21,7 +21,7 @@ class PostVote(Base):
     __table_args__ = (
         UniqueConstraint(
             "post_id",
-            "user_u_id",
+            "user_id",
             name="uq_post_vote",
         ),
     )
@@ -41,7 +41,7 @@ class PostVote(Base):
         index=True,
     )
 
-    user_u_id = Column(
+    user_id = Column(
         UUID(as_uuid=True),
         nullable=False,
         index=True,
@@ -63,14 +63,14 @@ class CommentVote(Base):
     __table_args__ = (
         UniqueConstraint(
             "comment_id",
-            "user_u_id",
+            "user_id",
             name="uq_comment_vote",
         ),
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    user_u_id = Column(
+    user_id = Column(
         UUID(as_uuid=True),
         default=uuid.uuid4,
         unique=True,
