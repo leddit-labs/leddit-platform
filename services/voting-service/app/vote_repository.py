@@ -11,14 +11,14 @@ class VoteRepository:
     def get_post_vote(
         self,
         db: Session,
-        post_u_id,
-        user_u_id,
+        post_id,
+        user_id,
     ):
         return (
             db.query(PostVote)
             .filter(
-                PostVote.post_id == post_u_id,
-                PostVote.user_id == user_u_id,
+                PostVote.post_id == post_id,
+                PostVote.user_id == user_id,
             )
             .first()
         )
@@ -38,14 +38,14 @@ class VoteRepository:
     def get_comment_vote(
         self,
         db: Session,
-        comment_u_id,
-        user_u_id,
+        comment_id,
+        user_id,
     ):
         return (
             db.query(CommentVote)
             .filter(
-                CommentVote.comment_id == comment_u_id,
-                CommentVote.user_id == user_u_id,
+                CommentVote.comment_id == comment_id,
+                CommentVote.user_id == user_id,
             )
             .first()
         )

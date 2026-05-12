@@ -70,6 +70,13 @@ class CommentVote(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
+    u_id = Column(
+        UUID(as_uuid=True),
+        default=uuid.uuid4,
+        unique=True,
+        index=True,
+    )
+
     user_id = Column(
         UUID(as_uuid=True),
         default=uuid.uuid4,
@@ -78,12 +85,6 @@ class CommentVote(Base):
     )
 
     comment_id = Column(
-        UUID(as_uuid=True),
-        nullable=False,
-        index=True,
-    )
-
-    user_id = Column(
         UUID(as_uuid=True),
         nullable=False,
         index=True,

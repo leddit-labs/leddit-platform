@@ -22,14 +22,14 @@ class VoteService:
     def vote_post(
         self,
         db: Session,
-        post_u_id,
+        post_id,
         data: VoteCreate,
     ) -> PostVote:
         # logic below is for making this an Idepempotent Operation
         # if users new voting requst matches an existing vote. return the existing vote
         existing_vote = self.repo.get_post_vote(
             db,
-            post_u_id,
+            post_id,
             data.user_id,
         )
 
@@ -49,8 +49,8 @@ class VoteService:
 
         else:
             vote = PostVote(
-                post_u_id=post_u_id,
-                user_u_id=data.user_id,
+                post_id=post_id,
+                user_id=data.user_id,
                 value=data.value,
             )
 
@@ -79,13 +79,13 @@ class VoteService:
     def vote_comment(
         self,
         db: Session,
-        comment_u_id,
+        comment_id,
         data: VoteCreate,
     ):
         existing_vote = self.repo.get_comment_vote(
             db,
-            comment_u_id,
-            data.user_u_id,
+            comment_id,
+            data.user_id,
         )
 
         old_value = 0
@@ -104,8 +104,8 @@ class VoteService:
 
         else:
             vote = CommentVote(
-                comment_u_id=comment_u_id,
-                user_u_id=data.user_id,
+                comment_id=comment_id,
+                user_id=data.user_id,
                 value=data.value,
             )
 

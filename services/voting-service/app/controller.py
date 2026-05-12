@@ -24,13 +24,13 @@ service = VoteService()
     response_model=PostVoteOut,
 )
 def vote_post(
-    post_u_id: UUID,
+    post_id: UUID,
     vote: VoteCreate,
     db: Session = Depends(get_db),
 ):
     return service.vote_post(
         db,
-        post_u_id,
+        post_id,
         vote,
     )
 
@@ -40,12 +40,12 @@ def vote_post(
     response_model=CommentVoteOut,
 )
 def vote_comment(
-    comment_u_id: UUID,
+    comment_id: UUID,
     vote: VoteCreate,
     db: Session = Depends(get_db),
 ):
     return service.vote_comment(
         db,
-        comment_u_id,
+        comment_id,
         vote,
     )
