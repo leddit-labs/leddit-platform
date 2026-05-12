@@ -36,10 +36,13 @@ comment-up: network
 user-up: network
 	cd services/user-service && docker compose up -d --build
 
+voting-up: network
+	cd services/voting-service && docker compose up -d --build
+
 keycloak-up: network
 	cd keycloak && docker compose up -d
 
-up: gateway-up community-up rabbit-up post-up comment-up user-up keycloak-up
+up: gateway-up community-up rabbit-up post-up comment-up user-up voting-up keycloak-up
 
 # -------------------------
 # DOWN
@@ -62,10 +65,13 @@ comment-down:
 user-down:
 	cd services/user-service && docker compose down
 
+voting-down:
+	cd services/voting-service && docker compose down
+
 keycloak-down:
 	cd keycloak && docker compose down
 
-down: gateway-down community-down rabbit-down post-down comment-down user-down keycloak-down
+down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down
 
 # -------------------------
 # STUFF

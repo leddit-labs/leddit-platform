@@ -1,7 +1,7 @@
 services:
 
   vote-db:
-    image: postgres:15
+    image: postgres:16
     container_name: vote-db
     restart: always
     env_file:
