@@ -12,6 +12,9 @@ COMPOSE = docker compose \
 network:
 	docker network inspect leddit-network >/dev/null 2>&1 || docker network create leddit-network
 
+fix-keycloak:
+	@bash keycloak/scripts/init-keycloak.sh
+
 # -------------------------
 # UP
 # -------------------------
@@ -24,7 +27,19 @@ community-up: network
 rabbit-up: network
 	cd rabbitmq && docker compose up -d
 
-up: gateway-up community-up
+post-up: network
+	cd services/post-service && docker compose up -d --build
+
+comment-up: network
+	cd services/comment-service && docker compose up -d --build
+
+user-up: network
+	cd services/user-service && docker compose up -d --build
+
+keycloak-up: network
+	cd keycloak && docker compose up -d
+
+up: gateway-up community-up rabbit-up post-up comment-up user-up keycloak-up
 
 # -------------------------
 # DOWN
@@ -38,7 +53,19 @@ community-down:
 rabbit-down:
 	cd rabbitmq && docker compose down
 
-down: gateway-down community-down rabbit-down
+post-down:
+	cd services/post-service && docker compose down
+
+comment-down:
+	cd services/comment-service && docker compose down
+
+user-down:
+	cd services/user-service && docker compose down
+
+keycloak-down:
+	cd keycloak && docker compose down
+
+down: gateway-down community-down rabbit-down post-down comment-down user-down keycloak-down
 
 # -------------------------
 # STUFF
@@ -46,4 +73,3 @@ down: gateway-down community-down rabbit-down
 clean:
 	cd services/community-service && docker compose down --remove-orphans
 	cd api-gateway && docker compose down --remove-orphans
-
