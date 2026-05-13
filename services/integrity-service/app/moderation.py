@@ -38,6 +38,7 @@ def moderate_post(title: str, content: str | None) -> bool:
             temperature=0,
         )
         answer = response.choices[0].message.content.strip().upper()
+        print(f"Deepseek raw response: '{answer}'")
         return "ACCEPTED" in answer
     except Exception:
         print("Deepseek API call failed. Defaulting to accepted")
