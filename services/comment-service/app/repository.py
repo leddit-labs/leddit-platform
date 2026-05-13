@@ -105,12 +105,11 @@ class CommentRepository:
             record = session.run(query, id=comment.id, content=content, updated_at=now).single()
             return self._to_comment(dict(record["c"]))
 
-    def soft_delete(self, comment: Comment) -> Comment:
+    def delete(self, comment: Comment) -> Comment:
         now = datetime.now(UTC).isoformat()
         query = """
         MATCH (c:Comment {id: $id})
-        SET c.content = '[deleted]',
-            c.deleted_at = $deleted_at,
+        SET c.deleted_at = $deleted_at,
             c.updated_at = $updated_at
         RETURN c
         """
