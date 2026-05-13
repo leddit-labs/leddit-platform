@@ -23,10 +23,11 @@ class PostService:
         publish_event(
             "post_created",
             {
-                "u_id": str(post.u_id),
+                "u.id": str(post.u_id),
                 "community_id": str(post.community_id),
                 "author_id": str(post.author_id),
                 "title": post.title,
+                "content": post.content,
             },
         )
         return self._to_out(post)
