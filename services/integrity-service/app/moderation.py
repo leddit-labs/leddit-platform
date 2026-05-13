@@ -36,6 +36,7 @@ def moderate_post(title: str, content: str | None) -> bool:
             ],
             max_tokens=10,
             temperature=0,
+            extra_body={"thinking": {"type": "disabled"}},
         )
         answer = response.choices[0].message.content.strip().upper()
         print(f"Deepseek raw response: '{answer}'")
