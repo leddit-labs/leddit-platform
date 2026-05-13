@@ -6,7 +6,7 @@ from .repository import CommentRepository
 from .schemas import CommentCreate, CommentResponse, CommentUpdate
 from .service import CommentService
 
-router = APIRouter(prefix="/comments", tags=["comments"])
+router = APIRouter(prefix="", tags=["comments"])
 
 
 def get_comment_service(db: Driver = Depends(get_db)) -> CommentService:
