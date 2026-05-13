@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     rabbitmq_pass: str
 
     deepseek_api_key: str
-    deepseek_base_url: str
-    deepseek_model: str
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-v4-flash"
 
     model_config = {"env_file": ".env"}
 
