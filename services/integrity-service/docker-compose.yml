@@ -1,0 +1,17 @@
+services:
+  integrity-service:
+    build: .
+    container_name: integrity-service
+    ports:
+      - "8007:8000"
+    networks:
+      - leddit-network
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+    env_file: ".env"
+    restart: unless-stopped
+
+networks:
+  leddit-network:
+    external: true
