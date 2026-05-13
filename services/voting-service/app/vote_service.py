@@ -82,6 +82,8 @@ class VoteService:
         comment_id,
         data: VoteCreate,
     ):
+        # logic below is for making this an Idepempotent Operation
+        # if users new voting requst matches an existing vote. return the existing vote
         existing_vote = self.repo.get_comment_vote(
             db,
             comment_id,
