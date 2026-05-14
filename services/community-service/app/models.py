@@ -8,3 +8,4 @@ class Community(Base):
     id = Column(String, primary_key=True)
     name = Column(String(50), unique=True, nullable=False, index=True)
     description = Column(String(500), default="")
+    created_by = Column(String, nullable=False, index=True)
