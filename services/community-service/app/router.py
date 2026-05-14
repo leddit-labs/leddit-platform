@@ -31,7 +31,7 @@ def create_community(
 ):
     if repository.get_by_name(db, body.name):
         raise HTTPException(409, "Community name already exists")
-    return repository.create(db, body)
+    return repository.create(db, body, created_by=user_id)
 
 
 @router.put("/{community_id}", response_model=CommunityOut)

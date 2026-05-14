@@ -4,11 +4,12 @@ from app.models import Community
 from app.schemas import CommunityCreate, CommunityUpdate
 
 
-def create(db: Session, data: CommunityCreate) -> Community:
+def create(db: Session, data: CommunityCreate, created_by: str) -> Community:
     community = Community(
         id=uuid4().hex[:12],
         name=data.name,
         description=data.description,
+        created_by=created_by,
     )
     db.add(community)
     db.commit()
