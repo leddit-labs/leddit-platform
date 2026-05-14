@@ -1,6 +1,12 @@
 routes:
-  - id: community-service-v1
+  # ────────────────────────────────────────────
+  #  Community Service
+  # ────────────────────────────────────────────
+ 
+  # Public
+  - id: community-service-read
     uri: /api/v1/communities*
+    methods: ["GET", "HEAD", "OPTIONS"]
     plugins:
       proxy-rewrite:
         regex_uri:
@@ -10,7 +16,50 @@ routes:
       type: roundrobin
       nodes:
         "community-service:8000": 1
+ 
+  # Protected
+  - id: community-service-write
+    uri: /api/v1/communities*
+    methods: ["POST", "PUT", "PATCH", "DELETE"]
+    plugins:
+      openid-connect:
+        client_id: "${OIDC_CLIENT_ID}"
+        client_secret: "${OIDC_CLIENT_SECRET}"
+        discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
+        bearer_only: true
+        realm: "leddit"
+        scope: "openid"
+        set_id_token_header: false
+        set_userinfo_header: false
+        set_access_token_header: true
+        access_token_in_authorization_header: true
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/communities(.*)"
+          - "/communities$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "community-service:8000": 1
 
+  # ────────────────────────────────────────────
+  #  keycloak auth
+  # ────────────────────────────────────────────
+  - id: keycloak-auth
+    uri: /auth/realms/leddit/*
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/auth/realms/leddit/(.*)"
+          - "/realms/leddit/$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  # ────────────────────────────────────────────
+  #  Other services
+  # ────────────────────────────────────────────
   - id: post-service-v1
     uri: /api/v1/posts*
     plugins:
