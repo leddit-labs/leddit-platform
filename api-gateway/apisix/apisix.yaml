@@ -23,8 +23,8 @@ routes:
     methods: ["POST", "PUT", "PATCH", "DELETE"]
     plugins:
       openid-connect:
-        client_id: "${OIDC_CLIENT_ID}"
-        client_secret: "${OIDC_CLIENT_SECRET}"
+        client_id: "leddit-api"
+        client_secret: "xg79IufwMOiaA4kQq5CtJJZH26oztka9"
         discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
         bearer_only: true
         realm: "leddit"
@@ -46,11 +46,11 @@ routes:
   #  keycloak auth
   # ────────────────────────────────────────────
   - id: keycloak-auth
-    uri: /auth/realms/leddit/*
+    uri: /auth*
     plugins:
       proxy-rewrite:
         regex_uri:
-          - "^/auth/realms/leddit/(.*)"
+          - "^/auth/(.*)"
           - "/realms/leddit/$1"
     upstream:
       type: roundrobin

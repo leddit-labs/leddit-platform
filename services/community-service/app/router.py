@@ -17,7 +17,6 @@ def get_current_user(
         raise HTTPException(401, "Missing or invalid authorization")
     token = authorization.split(" ", 1)[1]
     payload = json.loads(base64.urlsafe_b64decode(token.split(".")[1] + "=="))
-    print(payload["sub"])
     return payload["sub"]
 
 # ----------------------------------------------------
