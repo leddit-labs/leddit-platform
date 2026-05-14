@@ -10,6 +10,9 @@ class CommentService:
     def get_comment_raw(self, comment_id: int):
         return self.repository.get_by_id(comment_id)
 
+    def get_comment_raw_by_u_id(self, comment_u_id: str):
+        return self.repository.get_by_u_id(comment_u_id)
+
     def get_comment_by_id(self, comment_id: int):
         comment = self.repository.get_by_id(comment_id)
         return self._to_out(comment)

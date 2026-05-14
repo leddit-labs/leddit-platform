@@ -17,7 +17,7 @@ def get_comment_service(db: Driver = Depends(get_db)) -> CommentService:
 @router.post("/comments", response_model=CommentResponse, status_code=201)
 def create_comment(payload: CommentCreate, service: CommentService = Depends(get_comment_service)):
     if payload.parent_id is not None:
-        parent = service.get_comment_raw(payload.parent_id)
+        parent = service.get_comment_raw_by_u_id(payload.parent_id)
         if parent is None:
             raise HTTPException(status_code=400, detail="Parent comment does not exist")
         if parent.post_id != payload.post_id:
