@@ -109,8 +109,7 @@ class CommentRepository:
         now = datetime.now(UTC).isoformat()
         query = """
         MATCH (c:Comment {id: $id})
-        SET c.content = '[deleted]',
-            c.deleted_at = $deleted_at,
+        SET c.deleted_at = $deleted_at,
             c.updated_at = $updated_at
         RETURN c
         """
