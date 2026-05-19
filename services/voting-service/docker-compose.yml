@@ -1,59 +1,54 @@
 
 services:
 
-  vote-db-write:
+  vote-db:
     image: postgres:16
-    container_name: vote-db-write
+    container_name: vote-db
     env_file: .env
     ports:
       - "5435:5432"
     volumes:
-      - vote_write_data:/var/lib/postgresql/data
-
-  vote-db-read:
-    image: postgres:16
-    container_name: vote-db-read
-    env_file: .env
-    ports:
-      - "5436:5432"
-    volumes:
-      - vote_read_data:/var/lib/postgresql/data
-
+      - vote_data:/var/lib/postgresql/data
+      - ./app/db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    mem_limit: 300m
+  
   vote-write-api:
     build: .
     container_name: vote-write-api
     command: uv run uvicorn app.commands.main:app --host 0.0.0.0 --port 8004 --reload
     depends_on:
-      - vote-db-write
+      - vote-db
     env_file: .env
     ports:
       - "8004:8004"
     volumes:
       - .:/app
+    mem_limit: 300m
 
   vote-read-api:
     build: .
     container_name: vote-read-api
-    command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005 --reload
+    command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005
     depends_on:
-      - vote-db-read
+      - vote-db
     env_file: .env
     ports:
       - "8005:8005"
     volumes:
       - .:/app
+    mem_limit: 300m
 
   vote-projections:
     build: .
     container_name: vote-projections
     command: uv run python -m app.projections.consumer
     depends_on:
-      - vote-db-read
+      - vote-db
     env_file: .env
+    mem_limit: 200m
 
 volumes:
-  vote_write_data:
-  vote_read_data:
+  vote_data:
 
 
 networks:
