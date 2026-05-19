@@ -2,10 +2,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.db import get_db
-from app.vote_service import VoteService
+from app.db.db_write import get_write_db
+from app.commands.service import VoteService
 
-from app.schemas import (
+from app.commands.schemas import (
     VoteCreate,
     PostVoteOut,
     CommentVoteOut,
@@ -26,7 +26,7 @@ service = VoteService()
 def vote_post(
     post_id: UUID,
     vote: VoteCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_write_db),
 ):
     return service.vote_post(
         db,
@@ -42,7 +42,7 @@ def vote_post(
 def vote_comment(
     comment_id: UUID,
     vote: VoteCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_write_db),
 ):
     return service.vote_comment(
         db,

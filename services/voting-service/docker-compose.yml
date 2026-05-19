@@ -1,34 +1,60 @@
+
 services:
 
-  vote-db:
+  vote-db-write:
     image: postgres:16
-    container_name: vote-db
-    restart: always
-    env_file:
-      - .env
+    container_name: vote-db-write
+    env_file: .env
     ports:
       - "5435:5432"
-    networks:
-      - leddit-network
     volumes:
-      - vote_db_data:/var/lib/postgresql/data
+      - vote_write_data:/var/lib/postgresql/data
 
-  vote-service:
+  vote-db-read:
+    image: postgres:16
+    container_name: vote-db-read
+    env_file: .env
+    ports:
+      - "5436:5432"
+    volumes:
+      - vote_read_data:/var/lib/postgresql/data
+
+  vote-write-api:
     build: .
-    container_name: vote-service
+    container_name: vote-write-api
+    command: uv run uvicorn app.commands.main:app --host 0.0.0.0 --port 8004 --reload
     depends_on:
-      - vote-db
-    env_file:
-      - .env
+      - vote-db-write
+    env_file: .env
     ports:
       - "8004:8004"
-    networks:
-      - leddit-network
     volumes:
       - .:/app
 
+  vote-read-api:
+    build: .
+    container_name: vote-read-api
+    command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005 --reload
+    depends_on:
+      - vote-db-read
+    env_file: .env
+    ports:
+      - "8005:8005"
+    volumes:
+      - .:/app
+
+  vote-projections:
+    build: .
+    container_name: vote-projections
+    command: uv run python -m app.projections.consumer
+    depends_on:
+      - vote-db-read
+    env_file: .env
+
 volumes:
-  vote_db_data:
+  vote_write_data:
+  vote_read_data:
+
 
 networks:
   leddit-network:

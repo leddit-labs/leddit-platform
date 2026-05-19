@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models import (
+from app.commands.models import (
     PostVote,
     CommentVote,
 )

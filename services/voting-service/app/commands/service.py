@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 
-from app.vote_repository import VoteRepository
+from app.commands.repository import VoteRepository
 
-from app.models import (
+from app.commands.models import (
     PostVote,
     CommentVote,
 )
 
-from app.schemas import VoteCreate
+from app.commands.schemas import VoteCreate
 
 # TODO
 # from app.messaging import publish_event
