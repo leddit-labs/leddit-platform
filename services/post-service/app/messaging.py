@@ -12,9 +12,9 @@ def publish_event(routing_key: str, message: dict):
         )
     )
     channel = connection.channel()
-    channel.exchange_declare(exchange="posts", exchange_type="topic", durable=True)
+    channel.exchange_declare(exchange="leddit_events", exchange_type="topic", durable=True)
     channel.basic_publish(
-        exchange="posts",
+        exchange="leddit_events",
         routing_key=routing_key,
         body=json.dumps(message, default=str),
         properties=pika.BasicProperties(delivery_mode=2),  # persistent
