@@ -3,6 +3,7 @@
 NOTES.md
 TODO.md
 
+terraform.*
 .terraform*
 *.tfstate
 

@@ -42,7 +42,10 @@ voting-up: network
 keycloak-up: network
 	cd keycloak && docker compose up -d
 
-up: gateway-up community-up rabbit-up post-up comment-up user-up voting-up keycloak-up
+integrity-up: network
+	cd services/integrity-service && docker compose up -d
+
+up: gateway-up community-up rabbit-up post-up comment-up user-up keycloak-up integrity-up
 
 # -------------------------
 # DOWN
@@ -71,7 +74,10 @@ voting-down:
 keycloak-down:
 	cd keycloak && docker compose down
 
-down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down
+integrity-down:
+	cd services/integrity-service && docker compose down
+
+down: gateway-down community-down rabbit-down post-down comment-down user-down keycloak-down integrity-down
 
 # -------------------------
 # STUFF

@@ -1,47 +1,47 @@
-from fastapi import HTTPException
-
+from .models import Comment
 from .repository import CommentRepository
-from .schemas import CommentCreate, CommentUpdate
+from .schemas import CommentCreate, CommentResponse, CommentUpdate
 
 
 class CommentService:
     def __init__(self, repository: CommentRepository):
         self.repository = repository
 
-    def create_comment(self, payload: CommentCreate):
-        if payload.parent_id is not None:
-            parent = self.repository.get_by_u_id(payload.parent_id)
-            if parent is None:
-                raise HTTPException(status_code=400, detail="Parent comment does not exist")
-            if parent.post_id != payload.post_id:
-                raise HTTPException(status_code=400, detail="Parent comment belongs to another post")
+    def get_comment_raw(self, comment_id: int):
+        return self.repository.get_by_id(comment_id)
 
-        return self.repository.create(
+    def get_comment_raw_by_u_id(self, comment_u_id: str):
+        return self.repository.get_by_u_id(comment_u_id)
+
+    def get_comment_by_id(self, comment_id: int):
+        comment = self.repository.get_by_id(comment_id)
+        return self._to_out(comment)
+
+    def create_comment(self, payload: CommentCreate):
+        comment = self.repository.create(
             post_id=payload.post_id,
             parent_id=payload.parent_id,
             author_id=payload.author_id,
             content=payload.content,
         )
-
-    def get_comment(self, comment_id: int):
-        comment = self.repository.get_by_id(comment_id)
-        if comment is None:
-            raise HTTPException(status_code=404, detail="Comment not found")
-        return comment
+        return self._to_out(comment)
 
     def list_comments_for_post(self, post_id: str):
-        return self.repository.list_by_post_id(post_id)
+        comments = self.repository.list_by_post_id(post_id)
+        return [self._to_out(c) for c in comments]
 
-    def update_comment(self, comment_id: int, payload: CommentUpdate):
-        comment = self.get_comment(comment_id)
+    def update_comment(self, comment: Comment, payload: CommentUpdate):
+        updated_comment = self.repository.update_content(comment, payload.content)
+        return self._to_out(updated_comment)
+
+    def delete_comment(self, comment: Comment):
+        deleted_comment = self.repository.soft_delete(comment)
+        return self._to_out(deleted_comment)
+
+    def _to_out(self, comment: Comment) -> dict:
+        data = CommentResponse.model_validate(comment).model_dump()
+
         if comment.deleted_at is not None:
-            raise HTTPException(status_code=409, detail="Deleted comments cannot be edited")
+            data["content"] = "This comment has been deleted"
 
-        return self.repository.update_content(comment, payload.content)
-
-    def delete_comment(self, comment_id: int):
-        comment = self.get_comment(comment_id)
-        if comment.deleted_at is not None:
-            return comment
-
-        return self.repository.soft_delete(comment)
+        return data

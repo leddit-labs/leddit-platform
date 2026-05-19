@@ -14,6 +14,7 @@ class CommunityOut(BaseModel):
     id: str
     name: str
     description: str
+    created_by: str
 
     class Config:
         from_attributes = True
