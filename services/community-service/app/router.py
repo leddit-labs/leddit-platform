@@ -96,8 +96,8 @@ def list_moderators(community_id: str, db: Session = Depends(get_db)):
     if not community:
         raise HTTPException(404, "Community not found")
     return repository.get_moderators(db, community_id)
- 
- 
+
+
 @router.post("/{community_id}/moderators", response_model=ModeratorOut, status_code=201)
 def add_moderator(
     community_id: str,
@@ -113,8 +113,8 @@ def add_moderator(
     if repository.get_moderator(db, community_id, body.user_id):
         raise HTTPException(409, "User is already a moderator or owner")
     return repository.add_moderator(db, community_id, body.user_id)
- 
- 
+
+
 @router.delete("/{community_id}/moderators/{target_user_id}", status_code=204)
 def remove_moderator(
     community_id: str,
