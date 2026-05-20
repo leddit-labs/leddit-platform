@@ -9,7 +9,7 @@ from app.commands.models import (
 
 from app.commands.schemas import VoteCreate
 
-from app.messaging.messaging import publish_event
+from app.commands.messaging import publish_event
 
 # TODO
 # from app.messaging import publish_event

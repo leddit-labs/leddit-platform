@@ -11,6 +11,7 @@ from app.queries.models import (
 
 
 class ConsumerService:
+    # a vote has been made on a post, now the summaries should be updated
     def apply_post_vote(
         self,
         db: Session,
@@ -24,6 +25,7 @@ class ConsumerService:
 
         summary = db.get(PostVoteSummary, post_id)
 
+        # make a new summary in db if there is no existing summary for that post
         if not summary:
             summary = PostVoteSummary(
                 post_id=post_id,
@@ -33,6 +35,7 @@ class ConsumerService:
             )
             db.add(summary)
 
+        # check if user allready has voted on this post before
         existing_vote = (
             db.query(UserPostVote)
             .filter(
@@ -42,11 +45,13 @@ class ConsumerService:
             .first()
         )
 
+        # user has not voted on this post -> create a new one.
+        # save the userID together with postID, So that we can cheap fetch "has user voted on this post"
         if not existing_vote:
             existing_vote = UserPostVote(
                 post_id=post_id,
                 user_id=user_id,
-                value=0,
+                value=new_value, # TODO should this be 0 or new_value - need to test
             )
             db.add(existing_vote)
 

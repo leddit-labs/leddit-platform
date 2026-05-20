@@ -16,20 +16,17 @@ def get_consumer_channel(queue_name: str, binding_key: str):
 
     channel = connection.channel()
 
-    # exchange
     channel.exchange_declare(
         exchange=EXCHANGE_NAME,
         exchange_type="topic",
         durable=True,
     )
 
-    # queue
     channel.queue_declare(
         queue=queue_name,
         durable=True,
     )
 
-    # binding
     channel.queue_bind(
         exchange=EXCHANGE_NAME,
         queue=queue_name,
