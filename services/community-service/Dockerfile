@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
   dnsutils \
   iputils-ping \
+  git \
   && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
