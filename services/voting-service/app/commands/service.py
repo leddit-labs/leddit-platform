@@ -11,9 +11,6 @@ from app.commands.schemas import VoteCreate
 
 from app.commands.messaging import publish_event
 
-# TODO
-# from app.messaging import publish_event
-
 
 class VoteService:
     def __init__(self):
