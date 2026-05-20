@@ -9,6 +9,8 @@ from app.commands.models import (
 
 from app.commands.schemas import VoteCreate
 
+from app.messaging.messaging import publish_event
+
 # TODO
 # from app.messaging import publish_event
 
@@ -59,18 +61,15 @@ class VoteService:
                 vote,
             )
 
-        # below is to tell the future voting read model to update
-        """
         publish_event(
             "vote.post.changed",
             {
-                "post_u_id": str(post_u_id),
-                "user_u_id": str(data.user_u_id),
+                "post_id": str(post_id),
+                "user_id": str(data.user_id),
                 "old_value": old_value,
                 "new_value": data.value,
             },
         )
-        """
 
         return vote
 
@@ -116,16 +115,14 @@ class VoteService:
                 vote,
             )
 
-        """
         publish_event(
             "vote.comment.changed",
             {
-                "comment_u_id": str(comment_u_id),
-                "user_u_id": str(data.user_u_id),
+                "comment_id": str(comment_id),
+                "user_id": str(data.user_id),
                 "old_value": old_value,
                 "new_value": data.value,
             },
         )
-        """
 
         return vote

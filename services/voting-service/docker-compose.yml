@@ -11,6 +11,8 @@ services:
       - vote_data:/var/lib/postgresql/data
       - ./app/db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     mem_limit: 300m
+    networks:
+      - leddit-network
   
   vote-write-api:
     build: .
@@ -24,6 +26,8 @@ services:
     volumes:
       - .:/app
     mem_limit: 300m
+    networks:
+      - leddit-network
 
   vote-read-api:
     build: .
@@ -37,6 +41,8 @@ services:
     volumes:
       - .:/app
     mem_limit: 300m
+    networks:
+      - leddit-network
 
   vote-projections:
     build: .
@@ -46,6 +52,8 @@ services:
       - vote-db
     env_file: .env
     mem_limit: 200m
+    networks:
+      - leddit-network
 
 volumes:
   vote_data:
