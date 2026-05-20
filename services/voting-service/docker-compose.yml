@@ -47,7 +47,7 @@ services:
   vote-projections:
     build: .
     container_name: vote-projections
-    command: uv run python -u -m app.consumer.main #-u because off debug print statements in container
+    command: uv run python -u -m app.consumer.main #-u because of debug print statements in container
     depends_on:
       - vote-db
     env_file: .env
@@ -57,7 +57,6 @@ services:
 
 volumes:
   vote_data:
-
 
 networks:
   leddit-network:
