@@ -1,3 +1,10 @@
+global_rules:
+  - id: generate-request-id
+    plugins:
+      request-id:
+        header_name: "X-Request-ID"
+        include_in_response: true
+
 routes:
   # ────────────────────────────────────────────
   #  Community Service
