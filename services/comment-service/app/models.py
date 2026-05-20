@@ -13,3 +13,10 @@ class Comment:
     created_at: datetime
     updated_at: datetime | None
     deleted_at: datetime | None
+
+
+@dataclass
+class CommentVersion:
+    version_id: str
+    content: str
+    created_at: datetime
