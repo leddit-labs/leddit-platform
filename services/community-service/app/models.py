@@ -16,7 +16,7 @@ class Community(Base):
     description = Column(String(500), default="")
     created_by = Column(String, nullable=False, index=True)
 
-class CommunityModerators(Base):
+class CommunityModerator(Base):
     __tablename__ = "community_moderators"
 
     community_id = Column(String, ForeignKey("communities.id", ondelete="CASCADE"), primary_key=True)
