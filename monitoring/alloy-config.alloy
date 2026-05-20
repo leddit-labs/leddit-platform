@@ -1,0 +1,70 @@
+// Discover Docker containers
+discovery.docker "leddit" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Relabel: extract container name and compose service, filter to only "leddit" job containers
+discovery.relabel "leddit" {
+  targets = discovery.docker.leddit.targets
+
+  // Only scrape containers with the logging_job="leddit" label
+  rule {
+    source_labels = ["__meta_docker_container_label_logging_job"]
+    regex         = "leddit"
+    action        = "keep"
+  }
+
+  // Clean up container name (strip leading slash)
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  // Use the compose service name as the "service" label
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+
+  // Set the job label
+  rule {
+    source_labels = ["__meta_docker_container_label_logging_job"]
+    target_label  = "job"
+  }
+}
+
+// Collect logs from discovered containers
+loki.source.docker "leddit" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.relabel.leddit.output
+  forward_to    = [loki.process.leddit.receiver]
+  relabel_rules = discovery.relabel.leddit.rules
+}
+
+// Parse JSON logs and extract level + service as labels
+loki.process "leddit" {
+  stage.json {
+    expressions = {
+      level      = "",
+      service    = "",
+      request_id = "",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level   = "",
+      service = "",
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+// Push to Loki
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

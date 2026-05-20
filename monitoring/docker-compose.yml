@@ -12,14 +12,15 @@ services:
     networks:
       - leddit-network
 
-  promtail:
-    image: grafana/promtail:3.7.0
-    container_name: leddit-promtail
+  alloy:
+    image: grafana/alloy:v1.16.1
+    container_name: leddit-alloy
+    ports:
+      - "12345:12345"
     volumes:
-      - ./promtail-config.yml:/etc/promtail/config.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./alloy-config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: -config.file=/etc/promtail/config.yml
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     depends_on:
       - loki
     restart: unless-stopped

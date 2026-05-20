@@ -2,8 +2,8 @@ services:
   community-service:
     container_name: community-service
     build: .
-    # ports: - not needed because of apisix
-    #   - "8000:8000" - not needed because of apisix
+    labels:
+      logging_job: "leddit" # For promtail
     networks:
       - leddit-network
     env_file:
