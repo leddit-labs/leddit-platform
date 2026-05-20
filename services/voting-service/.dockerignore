@@ -1,0 +1,5 @@
+.venv
+app\__pycache__
+app\commands\__pycache__
+app\db\__pycache__
+app\queries\__pycache__
