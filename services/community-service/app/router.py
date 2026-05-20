@@ -6,11 +6,14 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas import (
-        CommunityCreate,
-        CommunityUpdate,
-        CommunityOut,
-        ModeratorAdd,
-        ModeratorOut,
+    CommunityCreate,
+    CommunityUpdate,
+    CommunityOut,
+    ModeratorAdd,
+    ModeratorOut,
+    RuleIn,
+    RuleUpdate,
+    RuleOut,
 )
 from app import repository
 
@@ -133,3 +136,69 @@ def remove_moderator(
     if mod.role.value == "owner":
         raise HTTPException(400, "Cannot remove the owner")
     repository.remove_moderator(db, mod)
+
+
+# ----------------------------------------------------
+# Rules
+# ----------------------------------------------------
+@router.get("/{community_id}/rules", response_model=list[RuleOut])
+def list_rules(community_id: str, db: Session = Depends(get_db)):
+    community = repository.get_by_id(db, community_id)
+    if not community:
+        raise HTTPException(404, "Community not found")
+    return repository.get_rules(db, community_id)
+
+
+@router.post("/{community_id}/rules", response_model=RuleOut, status_code=201)
+def add_rule(
+    community_id: str,
+    body: RuleIn,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    community = repository.get_by_id(db, community_id)
+    if not community:
+        raise HTTPException(404, "Community not found")
+    if not repository.is_moderator_or_owner(db, community_id, user_id):
+        raise HTTPException(403, "Only moderators can manage rules")
+    if repository.count_rules(db, community_id) >= 20:
+        raise HTTPException(400, "A community can have at most 20 rules")
+    return repository.add_rule(db, community_id, body)
+
+
+@router.patch("/{community_id}/rules/{rule_id}", response_model=RuleOut)
+def update_rule(
+    community_id: str,
+    rule_id: str,
+    body: RuleUpdate,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    community = repository.get_by_id(db, community_id)
+    if not community:
+        raise HTTPException(404, "Community not found")
+    if not repository.is_moderator_or_owner(db, community_id, user_id):
+        raise HTTPException(403, "Only moderators can manage rules")
+    rule = repository.get_rule(db, community_id, rule_id)
+    if not rule:
+        raise HTTPException(404, "Rule not found")
+    return repository.update_rule(db, rule, body)
+
+
+@router.delete("/{community_id}/rules/{rule_id}", status_code=204)
+def delete_rule(
+    community_id: str,
+    rule_id: str,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    community = repository.get_by_id(db, community_id)
+    if not community:
+        raise HTTPException(404, "Community not found")
+    if not repository.is_moderator_or_owner(db, community_id, user_id):
+        raise HTTPException(403, "Only moderators can manage rules")
+    rule = repository.get_rule(db, community_id, rule_id)
+    if not rule:
+        raise HTTPException(404, "Rule not found")
+    repository.delete_rule(db, rule)
+

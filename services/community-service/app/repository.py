@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy.orm import Session
-from app.models import Community, CommunityModerator, ModeratorRole
-from app.schemas import CommunityCreate, CommunityUpdate
+from app.models import Community, CommunityModerator, CommunityRule, ModeratorRole
+from app.schemas import CommunityCreate, CommunityUpdate, RuleIn, RuleUpdate
 
 # ----------------
 # Community CRUD
@@ -96,4 +96,66 @@ def is_owner(db: Session, community_id: str, user_id: str) -> bool:
 
 def is_moderator_or_owner(db: Session, community_id: str, user_id: str) -> bool:
     return get_moderator(db, community_id, user_id) is not None
+
+
+# ----------------
+# Rules
+# ----------------
+def get_rules(db: Session, community_id: str) -> list[CommunityRule]:
+    return (
+        db.query(CommunityRule)
+        .filter(CommunityRule.community_id == community_id)
+        .order_by(CommunityRule.order)
+        .all()
+    )
+
+
+def count_rules(db: Session, community_id: str) -> int:
+    return (
+        db.query(CommunityRule)
+        .filter(CommunityRule.community_id == community_id)
+        .count()
+    )
+
+def add_rule(db: Session, community_id: str, rule: RuleIn) -> CommunityRule:
+    r = CommunityRule(
+        id=uuid4().hex[:12],
+        community_id=community_id,
+        order=count_rules(db, community_id) + 1,
+        title=rule.title,
+        text=rule.text,
+    )
+    db.add(r)
+    db.commit()
+    db.refresh(r)
+    return r
+
+def get_rule(db: Session, community_id: str, rule_id: str) -> CommunityRule | None:
+    return (
+        db.query(CommunityRule)
+        .filter(CommunityRule.community_id == community_id, CommunityRule.id == rule_id)
+        .first()
+    )
+
+def update_rule(db: Session, rule: CommunityRule, data: RuleUpdate) -> CommunityRule:
+    if data.title is not None:
+        rule.title = data.title
+    if data.text is not None:
+        rule.text = data.text
+    db.commit()
+    db.refresh(rule)
+    return rule
+
+
+def delete_rule(db: Session, rule: CommunityRule) -> None:
+    community_id = rule.community_id
+    removed_order = rule.order
+
+    db.delete(rule)
+
+    db.query(CommunityRule).filter(
+        CommunityRule.community_id == community_id,
+        CommunityRule.order > removed_order,
+    ).update({CommunityRule.order: CommunityRule.order - 1})
+    db.commit()
 
