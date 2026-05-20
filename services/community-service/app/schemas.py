@@ -35,3 +35,21 @@ class ModeratorOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ----------------
+# Rules
+# ----------------
+class RuleIn(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100)
+    text: str = Field(...,min_length=1, max_length=500)
+
+
+class RuleOut(BaseModel):
+    id: str
+    order: int
+    title: str
+    text: str
+
+    class Config:
+        from_attributes = True
