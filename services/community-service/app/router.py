@@ -1,5 +1,6 @@
 import base64 
 import json
+import logging
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
@@ -16,6 +17,8 @@ from app.schemas import (
     RuleOut,
 )
 from app import repository
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/communities", tags=["communities"])
 
@@ -42,7 +45,10 @@ def create_community(
 ):
     if repository.get_by_name(db, body.name):
         raise HTTPException(409, "Community name already exists")
-    return repository.create(db, body, created_by=user_id)
+
+    community = repository.create(db, body, created_by=user_id)
+    logger.info("Community created", extra={"community_id": community.id, "community_name": body.name, "user_id": user_id})
+    return community
 
 
 @router.put("/{community_id}", response_model=CommunityOut)
@@ -56,6 +62,7 @@ def update_community(
     if not community:
         raise HTTPException(404, "Community not found")
     if not repository.is_moderator_or_owner(db, community_id, user_id):
+        logger.warning("Unauthorized change attempt", extra={"community_id": community_id, "user_id": user_id})
         raise HTTPException(403, "Only moderators can update a community")
     return repository.update(db, community, body)
 
@@ -70,6 +77,7 @@ def delete_community(
     if not community:
         raise HTTPException(404, "Community not found")
     if not repository.is_owner(db, community_id, user_id):
+        logger.warning("Unauthorized delete attempt", extra={"community_id": community_id, "user_id": user_id})
         raise HTTPException(403, "Only the owner can delete a community")
     repository.delete(db, community)
 
