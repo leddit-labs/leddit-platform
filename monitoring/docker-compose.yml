@@ -1,0 +1,53 @@
+services:
+  loki:
+    image: grafana/loki:3.7.0
+    container_name: leddit-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - leddit-network
+
+  promtail:
+    image: grafana/promtail:3.7.0
+    container_name: leddit-promtail
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - leddit-network
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    container_name: leddit-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - leddit-network
+
+volumes:
+  loki-data:
+  grafana-data:
+
+networks:
+  leddit-network:
+    external: true
+    name: leddit-network
