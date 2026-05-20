@@ -32,7 +32,7 @@ services:
   vote-read-api:
     build: .
     container_name: vote-read-api
-    command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005
+    command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005 --reload
     depends_on:
       - vote-db
     env_file: .env
@@ -47,7 +47,7 @@ services:
   vote-projections:
     build: .
     container_name: vote-projections
-    command: uv run python -m app.projections.consumer
+    command: uv run python -u -m app.consumer.main #-u because off debug print statements in container
     depends_on:
       - vote-db
     env_file: .env
