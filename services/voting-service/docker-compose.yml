@@ -16,6 +16,8 @@ services:
   
   vote-write-api:
     build: .
+    labels:
+      logging_job: "leddit"
     container_name: vote-write-api
     command: uv run uvicorn app.commands.main:app --host 0.0.0.0 --port 8004 --reload
     depends_on:
@@ -31,6 +33,8 @@ services:
 
   vote-read-api:
     build: .
+    labels:
+      logging_job: "leddit"
     container_name: vote-read-api
     command: uv run uvicorn app.queries.main:app --host 0.0.0.0 --port 8005 --reload
     depends_on:
@@ -46,6 +50,8 @@ services:
 
   vote-projections:
     build: .
+    labels:
+      logging_job: "leddit"
     container_name: vote-projections
     command: uv run python -u -m app.consumer.main #-u because of debug print statements in container
     depends_on:

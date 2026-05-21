@@ -1,6 +1,8 @@
 services:
   integrity-service:
     build: .
+    labels:
+      logging_job: "leddit"
     container_name: integrity-service
     ports:
       - "8007:8000"

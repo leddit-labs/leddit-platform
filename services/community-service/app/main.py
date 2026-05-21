@@ -10,7 +10,6 @@ logger = setup_logging("community-service")
 app = FastAPI(title=settings.app_name)
 
 app.add_middleware(RequestLoggingMiddleware)
-
 app.include_router(router)
 
 @app.on_event("startup")

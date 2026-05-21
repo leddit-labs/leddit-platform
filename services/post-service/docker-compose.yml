@@ -17,6 +17,8 @@ services:
 
   post-service:
     build: .
+    labels:
+      logging_job: "leddit"
     container_name: post-service
     depends_on:
       post-db:

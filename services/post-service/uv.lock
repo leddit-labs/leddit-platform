@@ -111,6 +111,14 @@ wheels = [
 ]
 
 [[package]]
+name = "leddit-logging"
+version = "0.1.0"
+source = { git = "https://github.com/leddit-labs/leddit-platform.git?subdirectory=leddit-logging&rev=v0.1.0#bf864f13df75a723fdcf8fd1f84c92b08b5cd52f" }
+dependencies = [
+    { name = "starlette" },
+]
+
+[[package]]
 name = "pika"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -125,6 +133,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "leddit-logging" },
     { name = "pika" },
     { name = "psycopg2" },
     { name = "pydantic" },
@@ -136,6 +145,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.136.1" },
+    { name = "leddit-logging", git = "https://github.com/leddit-labs/leddit-platform.git?subdirectory=leddit-logging&rev=v0.1.0" },
     { name = "pika", specifier = ">=1.4.0" },
     { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pydantic", specifier = ">=2.13.3" },
