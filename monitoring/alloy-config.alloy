@@ -1,3 +1,6 @@
+// ================
+// LOGGING
+// ================
 // Discover Docker containers
 discovery.docker "leddit" {
   host = "unix:///var/run/docker.sock"
@@ -66,5 +69,70 @@ loki.process "leddit" {
 loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// ================
+// METRICS
+// ================
+// Discover Docker containers that expose a metrics port.
+// We reuse the same docker discovery and filter for containers
+// that have the label "metrics_port" set.
+discovery.relabel "metrics" {
+  targets = discovery.docker.leddit.targets
+
+  // Only scrape containers with metrics_port label
+  rule {
+    source_labels = ["__meta_docker_container_label_metrics_port"]
+    regex         = ".+"
+    action        = "keep"
+  }
+
+  // Override the scrape address to use the container's network IP + metrics port
+  rule {
+    source_labels = ["__meta_docker_container_network_ip", "__meta_docker_container_label_metrics_port"]
+    separator     = ":"
+    target_label  = "__address__"
+  }
+
+  // Set the metrics path (default /metrics, but allow override via label)
+  rule {
+    source_labels = ["__meta_docker_container_label_metrics_path"]
+    regex         = "(.+)"
+    target_label  = "__metrics_path__"
+  }
+
+  // Clean up container name
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  // Use compose service name
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+
+  // Set a job label for metrics
+  rule {
+    replacement  = "leddit"
+    target_label = "job"
+  }
+}
+
+// Scrape Prometheus metrics from discovered containers
+prometheus.scrape "leddit_services" {
+  targets    = discovery.relabel.metrics.output
+  forward_to = [prometheus.remote_write.default.receiver]
+
+  scrape_interval = "15s"
+}
+
+// Write metrics to Prometheus
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
   }
 }

@@ -12,6 +12,23 @@ services:
     networks:
       - leddit-network
 
+  prometheus:
+    image: prom/prometheus:v3.4.0
+    container_name: leddit-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    # Enable remote write receiver so Alloy can push metrics
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
+      - "--storage.tsdb.retention.time=15d"
+    restart: unless-stopped
+    networks:
+      - leddit-network
+
   alloy:
     image: grafana/alloy:v1.16.1
     container_name: leddit-alloy
@@ -23,6 +40,7 @@ services:
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     depends_on:
       - loki
+      - prometheus
     restart: unless-stopped
     networks:
       - leddit-network
@@ -40,6 +58,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - loki
+      - prometheus
     restart: unless-stopped
     networks:
       - leddit-network
@@ -47,6 +66,7 @@ services:
 volumes:
   loki-data:
   grafana-data:
+  prometheus-data:
 
 networks:
   leddit-network:

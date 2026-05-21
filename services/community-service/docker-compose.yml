@@ -3,7 +3,8 @@ services:
     container_name: community-service
     build: .
     labels:
-      logging_job: "leddit" # For promtail
+      logging_job: "leddit" # For Alloy
+      metrics_port: "8000"
     networks:
       - leddit-network
     env_file:
