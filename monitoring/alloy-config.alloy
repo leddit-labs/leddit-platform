@@ -90,9 +90,11 @@ discovery.relabel "metrics" {
 
   // Override the scrape address to use the container's network IP + metrics port
   rule {
-    source_labels = ["__meta_docker_container_network_ip", "__meta_docker_container_label_metrics_port"]
+    source_labels = ["__meta_docker_network_ip", "__meta_docker_port_private"]
     separator     = ":"
     target_label  = "__address__"
+    replacement   = "$1"
+    regex         = "(.*)"
   }
 
   // Set the metrics path (default /metrics, but allow override via label)
