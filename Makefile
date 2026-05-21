@@ -45,7 +45,10 @@ keycloak-up: network
 integrity-up: network
 	cd services/integrity-service && docker compose up -d
 
-up: gateway-up community-up rabbit-up post-up comment-up user-up voting-up keycloak-up integrity-up
+monitoring-up: network
+	cd monitoring && docker compose up -d
+
+up: gateway-up community-up rabbit-up post-up comment-up user-up voting-up keycloak-up integrity-up monitoring-up
 
 # -------------------------
 # DOWN
@@ -77,7 +80,10 @@ keycloak-down:
 integrity-down:
 	cd services/integrity-service && docker compose down
 
-down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down integrity-down
+monitoring-down:
+	cd monitoring && docker compose down
+
+down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down integrity-down monitoring-down
 
 # -------------------------
 # STUFF

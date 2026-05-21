@@ -2,10 +2,13 @@ services:
   community-service:
     container_name: community-service
     build: .
-    # ports: - not needed because of apisix
-    #   - "8000:8000" - not needed because of apisix
+    labels:
+      logging_job: "leddit" # For Alloy
+      metrics_port: "8000"
     networks:
       - leddit-network
+    ports:
+      - "8002:8000"
     env_file:
       - .env
     environment:

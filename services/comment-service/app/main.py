@@ -1,16 +1,23 @@
 from fastapi import FastAPI
 from neo4j.exceptions import Neo4jError
 
+from leddit_logging import setup_logging, RequestLoggingMiddleware
+
 from .controller import router as comment_router
 from .database import check_db_connection, init_db
 
+logger = setup_logging("comment-service")
+
 app = FastAPI(title="Leddit Comment Service", version="0.1.0")
+
+app.add_middleware(RequestLoggingMiddleware)
 app.include_router(comment_router)
 
 
 @app.on_event("startup")
 def on_startup() -> None:
     init_db()
+    logger.info("comment-service is ready")
 
 
 @app.get("/health")
