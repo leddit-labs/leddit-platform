@@ -79,7 +79,7 @@ def _on_message(channel, method, properties, body):
                 db=db,
                 post_id=event["post_id"],
                 user_id=event["user_id"],
-                old_value=event["old_value"],
+                #old_value=event["old_value"],
                 new_value=event["new_value"],
             )
 
@@ -88,7 +88,7 @@ def _on_message(channel, method, properties, body):
                 db=db,
                 comment_id=event["comment_id"],
                 user_id=event["user_id"],
-                old_value=event["old_value"],
+                #old_value=event["old_value"],
                 new_value=event["new_value"],
             )
 
