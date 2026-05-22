@@ -32,13 +32,10 @@ class VoteService:
             data.user_id,
         )
 
-        old_value = 0
-
         if existing_vote:
             if existing_vote.value == data.value:
                 return existing_vote
 
-            old_value = existing_vote.value
 
             vote = self.repo.update_vote(
                 db,
@@ -63,7 +60,6 @@ class VoteService:
             {
                 "post_id": str(post_id),
                 "user_id": str(data.user_id),
-                "old_value": old_value,
                 "new_value": data.value,
             },
         )
@@ -86,13 +82,11 @@ class VoteService:
             data.user_id,
         )
 
-        old_value = 0
 
         if existing_vote:
             if existing_vote.value == data.value:
                 return existing_vote
 
-            old_value = existing_vote.value
 
             vote = self.repo.update_vote(
                 db,
@@ -117,7 +111,6 @@ class VoteService:
             {
                 "comment_id": str(comment_id),
                 "user_id": str(data.user_id),
-                "old_value": old_value,
                 "new_value": data.value,
             },
         )
