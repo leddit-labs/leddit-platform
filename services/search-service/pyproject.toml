@@ -1,0 +1,18 @@
+[project]
+name = "search-service"
+version = "0.1.0"
+description = "Elasticsearch-backed search service for posts"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "elasticsearch>=8.18.0,<9.0.0",
+    "fastapi>=0.136.1",
+    "leddit-logging",
+    "pika>=1.4.0",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "uvicorn>=0.46.0",
+]
+
+[tool.uv.sources]
+leddit-logging = { git = "https://github.com/leddit-labs/leddit-platform.git", subdirectory = "leddit-logging", rev = "v0.1.0" }

@@ -30,6 +30,9 @@ rabbit-up: network
 post-up: network
 	cd services/post-service && docker compose up -d --build
 
+search-up: network
+	cd services/search-service && docker compose up -d --build
+
 comment-up: network
 	cd services/comment-service && docker compose up -d --build
 
@@ -48,7 +51,7 @@ integrity-up: network
 monitoring-up: network
 	cd monitoring && docker compose up -d
 
-up: gateway-up community-up rabbit-up post-up comment-up user-up voting-up keycloak-up integrity-up monitoring-up
+up: gateway-up community-up rabbit-up post-up search-up comment-up user-up voting-up keycloak-up integrity-up monitoring-up
 
 # -------------------------
 # DOWN
@@ -64,6 +67,9 @@ rabbit-down:
 
 post-down:
 	cd services/post-service && docker compose down
+
+search-down:
+	cd services/search-service && docker compose down
 
 comment-down:
 	cd services/comment-service && docker compose down
@@ -83,7 +89,7 @@ integrity-down:
 monitoring-down:
 	cd monitoring && docker compose down
 
-down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down integrity-down monitoring-down
+down: gateway-down community-down rabbit-down post-down search-down comment-down user-down voting-down keycloak-down integrity-down monitoring-down
 
 # -------------------------
 # STUFF
