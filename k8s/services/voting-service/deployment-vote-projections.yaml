@@ -1,0 +1,37 @@
+# --- Vote Projections Consumer ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-projections
+  namespace: leddit
+  labels:
+    app: vote-projections
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vote-projections
+  template:
+    metadata:
+      labels:
+        app: vote-projections
+        logging_job: leddit
+    spec:
+      containers:
+        - name: vote-projections
+          image: leddit/voting-service:latest
+          imagePullPolicy: Never
+          command: [uv, run, python, -u, -m, app.consumer.main]
+          envFrom:
+            - secretRef:
+                name: vote-db-secret
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi

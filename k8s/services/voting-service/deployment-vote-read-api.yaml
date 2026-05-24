@@ -1,0 +1,42 @@
+# --- Vote Read API ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-read-api
+  namespace: leddit
+  labels:
+    app: vote-read-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vote-read-api
+  template:
+    metadata:
+      labels:
+        app: vote-read-api
+        logging_job: leddit
+    spec:
+      containers:
+        - name: vote-read-api
+          image: leddit/voting-service:latest
+          imagePullPolicy: Never
+          command: [uv, run, uvicorn, app.queries.main:app, --host, "0.0.0.0", --port, "8005"]
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - secretRef:
+                name: vote-db-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 300Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 5
