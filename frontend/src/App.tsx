@@ -1,9 +1,15 @@
 import { Button, Container, Heading } from "@chakra-ui/react";
 import Navbar from "./components/Navbar";
 import { usePosts } from "./api/domain/posts/usePosts";
+import { useState } from "react";
 
 function App() {
-	const { posts, page, loadPosts } = usePosts(1,3);
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading, isError } = usePosts(page, 3);
+
+  const posts = data ?? [];
+
   return (
     <>
       <Navbar />
@@ -13,15 +19,15 @@ function App() {
         <Button color="brand.500">Click here lmao xd</Button>
       </Container>
 
-	{/* just some debug test fetching below - will be deleted */}
       <div>
-		<br></br>
-		<div>This below will only show posts if you have posts in your post db</div>
-		<div>Try Press "Prev" and "Next"</div>
-		<br></br>
-        <button onClick={() => loadPosts(page - 1)}>Prev</button>
-        <button onClick={() => loadPosts(page + 1)}>Next</button>
-		
+        <button onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</button>
+
+        <button onClick={() => setPage((p) => p + 1)}>Next</button>
+
+        {isLoading && <div>Loading...</div>}
+
+        {isError && <div>Something broke</div>}
+
         {posts.map((p) => (
           <div key={p.u_id}>{p.title}</div>
         ))}
