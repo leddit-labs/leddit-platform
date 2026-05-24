@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getPosts } from "../service/postService";
 import type { Post } from "../types/post";
 
-export function usePosts(initialPage = 1) {
+export function usePosts(initialPage = 1, size = 5) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
@@ -12,7 +12,7 @@ export function usePosts(initialPage = 1) {
 
     setLoading(true);
 
-    const data: Post[] = await getPosts({ page, size: 3 });
+    const data: Post[] = await getPosts({ page, size: size });
 
     setPosts(data);
     setPage(page);

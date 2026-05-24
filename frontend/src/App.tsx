@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar";
 import { usePosts } from "./api/hooks/usePosts";
 
 function App() {
-	const { posts, page, loadPosts } = usePosts();
+	const { posts, page, loadPosts } = usePosts(1,3);
 	console.log(posts)
   return (
     <>
