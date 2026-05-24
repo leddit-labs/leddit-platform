@@ -24,7 +24,7 @@ docker build -t leddit/integrity-service:latest "$ProjectRoot\services\integrity
 docker build -t leddit/frontend:latest          "$ProjectRoot\frontend"
 
 Write-Host "==> Creating namespace..."
-kubectl apply -f "$K8sDir\namespace\"
+kubectl apply -f "$K8sDir\namespace"
 
 Write-Host "==> Creating configmaps from source files..."
 kubectl -n leddit create configmap monitoring-config `
@@ -52,23 +52,23 @@ helm repo update
 helm upgrade --install keda kedacore/keda --namespace keda --create-namespace --wait
 
 Write-Host "==> Deploying infrastructure..."
-kubectl apply -f "$K8sDir\infrastructure\rabbitmq\"
-kubectl apply -f "$K8sDir\infrastructure\keycloak\"
-kubectl apply -f "$K8sDir\infrastructure\monitoring\"
-kubectl apply -f "$K8sDir\infrastructure\apisix\"
+kubectl apply -f "$K8sDir\infrastructure\rabbitmq"
+kubectl apply -f "$K8sDir\infrastructure\keycloak"
+kubectl apply -f "$K8sDir\infrastructure\monitoring"
+kubectl apply -f "$K8sDir\infrastructure\apisix"
 
 Write-Host "==> Waiting for infrastructure..."
 kubectl -n leddit wait --for=condition=ready pod -l app=rabbitmq --timeout=120s
 kubectl -n leddit wait --for=condition=ready pod -l app=keycloak-db --timeout=60s
 
 Write-Host "==> Deploying application services..."
-kubectl apply -f "$K8sDir\services\post-service\"
-kubectl apply -f "$K8sDir\services\comment-service\"
-kubectl apply -f "$K8sDir\services\community-service\"
-kubectl apply -f "$K8sDir\services\user-service\"
-kubectl apply -f "$K8sDir\services\voting-service\"
-kubectl apply -f "$K8sDir\services\integrity-service\"
-kubectl apply -f "$K8sDir\services\frontend\"
+kubectl apply -f "$K8sDir\services\post-service"
+kubectl apply -f "$K8sDir\services\comment-service"
+kubectl apply -f "$K8sDir\services\community-service"
+kubectl apply -f "$K8sDir\services\user-service"
+kubectl apply -f "$K8sDir\services\voting-service"
+kubectl apply -f "$K8sDir\services\integrity-service"
+kubectl apply -f "$K8sDir\services\frontend"
 
 Write-Host ""
 Write-Host "==> Done! Watch pods come up with:"
