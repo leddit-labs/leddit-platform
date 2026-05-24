@@ -20,17 +20,17 @@ spec:
           image: leddit/frontend:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 80
+            - containerPort: 5173
           resources:
             requests:
               cpu: 50m
-              memory: 64Mi
+              memory: 256Mi
             limits:
               cpu: 200m
-              memory: 128Mi
+              memory: 512Mi
           readinessProbe:
             httpGet:
               path: /
-              port: 80
-            initialDelaySeconds: 5
+              port: 5173
+            initialDelaySeconds: 10
             periodSeconds: 5
