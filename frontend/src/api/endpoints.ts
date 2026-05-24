@@ -17,4 +17,11 @@ export const endpoints = {
     update: (id: string) => `${API_PREFIX}/posts/${id}`,
     delete: (id: string) => `${API_PREFIX}/posts/${id}`,
   },
+
+  communities: {
+
+  },
+
+  //and so on
+  //and so on
 };

@@ -1,17 +1,12 @@
-import api from "../client";
-import { endpoints } from "../endpoints";
-import type {
-  Post,
-  CreatePostRequest,
-  UpdatePostRequest,
-  PaginatedPosts,
-} from "../types/post";
+import api from "../../client";
+import { endpoints } from "../../endpoints";
+import type { Post, CreatePostRequest, UpdatePostRequest } from "./post";
 
 export async function getPosts(params?: {
   page?: number;
   size?: number;
-}): Promise<PaginatedPosts> {
-  const res = await api.get<PaginatedPosts>(endpoints.posts.all, {
+}): Promise<Post[]> {
+  const res = await api.get<Post[]>(endpoints.posts.all, {
     params,
   });
 

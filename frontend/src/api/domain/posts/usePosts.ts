@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getPosts } from "../service/postService";
-import type { Post } from "../types/post";
+import { getPosts } from "./postService";
+import type { Post } from "./post";
 
 export function usePosts(initialPage = 1, size = 5) {
   const [posts, setPosts] = useState<Post[]>([]);
