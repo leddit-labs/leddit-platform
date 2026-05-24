@@ -1,17 +1,18 @@
 # ─────────────────────────────────────────────
 # Leddit K8s Local Setup Script (Windows)
-# Run from the project root (where the k8s/ dir lives)
+# Can be run from anywhere — paths resolve from the script's location
 # ─────────────────────────────────────────────
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ProjectRoot = Split-Path -Parent $ScriptDir
+$K8sDir = Split-Path -Parent $ScriptDir
+$ProjectRoot = Split-Path -Parent $K8sDir
 
 Write-Host "==> Starting minikube..."
 minikube start --cpus=4 --memory=8192 --driver=docker --addons=metrics-server,ingress
 
 Write-Host "==> Pointing Docker to minikube..."
-minikube docker-env | Invoke-Expression
+minikube docker-env --shell powershell | Invoke-Expression
 
 Write-Host "==> Building service images..."
 docker build -t leddit/post-service:latest      "$ProjectRoot\services\post-service"
@@ -23,7 +24,7 @@ docker build -t leddit/integrity-service:latest "$ProjectRoot\services\integrity
 docker build -t leddit/frontend:latest          "$ProjectRoot\frontend"
 
 Write-Host "==> Creating namespace..."
-kubectl apply -f "$ScriptDir\namespace\"
+kubectl apply -f "$K8sDir\namespace\"
 
 Write-Host "==> Creating configmaps from source files..."
 kubectl -n leddit create configmap monitoring-config `
@@ -51,23 +52,23 @@ helm repo update
 helm upgrade --install keda kedacore/keda --namespace keda --create-namespace --wait
 
 Write-Host "==> Deploying infrastructure..."
-kubectl apply -f "$ScriptDir\infrastructure\rabbitmq\"
-kubectl apply -f "$ScriptDir\infrastructure\keycloak\"
-kubectl apply -f "$ScriptDir\infrastructure\monitoring\"
-kubectl apply -f "$ScriptDir\infrastructure\apisix\"
+kubectl apply -f "$K8sDir\infrastructure\rabbitmq\"
+kubectl apply -f "$K8sDir\infrastructure\keycloak\"
+kubectl apply -f "$K8sDir\infrastructure\monitoring\"
+kubectl apply -f "$K8sDir\infrastructure\apisix\"
 
 Write-Host "==> Waiting for infrastructure..."
 kubectl -n leddit wait --for=condition=ready pod -l app=rabbitmq --timeout=120s
 kubectl -n leddit wait --for=condition=ready pod -l app=keycloak-db --timeout=60s
 
 Write-Host "==> Deploying application services..."
-kubectl apply -f "$ScriptDir\services\post-service\"
-kubectl apply -f "$ScriptDir\services\comment-service\"
-kubectl apply -f "$ScriptDir\services\community-service\"
-kubectl apply -f "$ScriptDir\services\user-service\"
-kubectl apply -f "$ScriptDir\services\voting-service\"
-kubectl apply -f "$ScriptDir\services\integrity-service\"
-kubectl apply -f "$ScriptDir\services\frontend\"
+kubectl apply -f "$K8sDir\services\post-service\"
+kubectl apply -f "$K8sDir\services\comment-service\"
+kubectl apply -f "$K8sDir\services\community-service\"
+kubectl apply -f "$K8sDir\services\user-service\"
+kubectl apply -f "$K8sDir\services\voting-service\"
+kubectl apply -f "$K8sDir\services\integrity-service\"
+kubectl apply -f "$K8sDir\services\frontend\"
 
 Write-Host ""
 Write-Host "==> Done! Watch pods come up with:"
@@ -75,3 +76,8 @@ Write-Host "    kubectl -n leddit get pods -w"
 Write-Host ""
 Write-Host "==> To access services, run in a separate terminal:"
 Write-Host "    minikube tunnel"
+Write-Host ""
+Write-Host "==> Or port-forward individually:"
+Write-Host "    kubectl -n leddit port-forward svc/apisix 9080:9080"
+Write-Host "    kubectl -n leddit port-forward svc/grafana 3000:3000"
+Write-Host "    kubectl -n leddit port-forward svc/keycloak 8080:8080"
