@@ -8,11 +8,18 @@ from app.routes import router
 
 logger = setup_logging("user-service")
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     yield
 
+
 app = FastAPI(title="Leddit User Service", lifespan=lifespan)
 app.add_middleware(RequestLoggingMiddleware)
 app.include_router(router)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
