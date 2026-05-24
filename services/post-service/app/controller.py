@@ -5,7 +5,7 @@ from app.db import get_db
 from app.schemas import PostCreate, PostUpdate, PostOut
 from app.post_service import PostService
 
-router = APIRouter(prefix="/posts", tags=["posts"])
+router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 
 service = PostService()
 
