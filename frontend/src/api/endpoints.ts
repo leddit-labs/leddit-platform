@@ -1,7 +1,7 @@
 export const BASE_API_GATEWAY =
   import.meta.env.VITE_API_GATEWAY ?? "http://localhost:9080";
 
-const API_PREFIX = ""; // if we have a version or other prefix. for example api/v1
+const API_PREFIX = "/api/v1"; // if we have a version or other prefix. for example api/v1
 
 export const endpoints = {
   //here u go wenmin add your endpoints here pls
