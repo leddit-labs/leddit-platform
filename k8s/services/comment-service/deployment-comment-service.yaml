@@ -30,6 +30,8 @@ spec:
               value: neo4j
             - name: NEO4J_PASSWORD
               value: leddit123
+            - name: RABBITMQ_PORT
+              value: "5672"
           resources:
             requests:
               cpu: 100m

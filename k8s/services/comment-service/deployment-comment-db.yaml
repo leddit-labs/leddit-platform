@@ -46,8 +46,9 @@ spec:
           readinessProbe:
             exec:
               command: [cypher-shell, -u, neo4j, -p, leddit123, "RETURN 1"]
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
       volumes:
         - name: data
           persistentVolumeClaim:
