@@ -1,4 +1,4 @@
-import { Box, Text, VStack, IconButton, HStack } from "@chakra-ui/react";
+import { Box, Text, VStack, IconButton,} from "@chakra-ui/react";
 import type { Post } from "../../api/domain/posts/post";
 import { formatDate } from "../../util/date";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
