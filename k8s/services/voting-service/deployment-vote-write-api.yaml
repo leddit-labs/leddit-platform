@@ -21,7 +21,17 @@ spec:
         - name: vote-write-api
           image: leddit/voting-service:latest
           imagePullPolicy: Never
-          command: [uv, run, uvicorn, app.commands.main:app, --host, "0.0.0.0", --port, "8004"]
+          command:
+            [
+              uv,
+              run,
+              uvicorn,
+              app.commands.main:app,
+              --host,
+              "0.0.0.0",
+              --port,
+              "8004",
+            ]
           ports:
             - containerPort: 8004
           envFrom:
@@ -30,6 +40,8 @@ spec:
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
           resources:
             requests:
               cpu: 100m

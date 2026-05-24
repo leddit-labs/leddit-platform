@@ -22,12 +22,9 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 8000
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: community-db-secret
-                  key: DATABASE_URL
+          envFrom:
+            - secretRef:
+                name: community-db-secret
           resources:
             requests:
               cpu: 100m

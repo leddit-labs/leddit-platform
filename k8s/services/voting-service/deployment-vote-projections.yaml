@@ -28,6 +28,8 @@ spec:
           env:
             - name: RABBITMQ_HOST
               value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
           resources:
             requests:
               cpu: 50m

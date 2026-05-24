@@ -29,16 +29,20 @@ spec:
                 secretKeyRef:
                   name: comment-db-secret
                   key: NEO4J_AUTH
+            - name: NEO4J_server_memory_heap_max__size
+              value: "256m"
+            - name: NEO4J_server_memory_pagecache_size
+              value: "128m"
           volumeMounts:
             - name: data
               mountPath: /data
           resources:
             requests:
               cpu: 200m
-              memory: 512Mi
+              memory: 1Gi
             limits:
               cpu: 500m
-              memory: 1Gi
+              memory: 2Gi
           readinessProbe:
             exec:
               command: [cypher-shell, -u, neo4j, -p, leddit123, "RETURN 1"]
