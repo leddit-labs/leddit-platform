@@ -38,3 +38,10 @@ HPA looks at pod metrics like CPU usage or memory usage.
 2. Test it
 3. Update Makefile to build service images inside minikube
 4. Update Makefile to apply the manifests
+
+## Users guide
+
+Remove everything in namespace:
+```bash
+kubectl delete namespace leddit
+```
