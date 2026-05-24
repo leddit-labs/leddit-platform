@@ -3,8 +3,9 @@ COMPOSE = docker compose \
 		-f api-gateway/docker-compose.yml \
 		-f services/community-service/docker-compose.yml
 
+NAMESPACE := leddit
 
-.PHONY: build clean down network ps gateway-up
+.PHONY: build clean down network ps gateway-up kube-script kube-up kube-down kube-nuke
 
 # -------------------------
 # HELPERS
@@ -86,8 +87,29 @@ monitoring-down:
 down: gateway-down community-down rabbit-down post-down comment-down user-down voting-down keycloak-down integrity-down monitoring-down
 
 # -------------------------
+# Kubernetes
+# -------------------------
+
+kube-up:
+	powershell -ExecutionPolicy Bypass -File k8s\scripts\setup.ps1
+
+kube-down:
+	kubectl delete namespace $(NAMESPACE) --ignore-not-found=true
+
+status:
+	kubectl get all -n $(NAMESPACE)
+
+pods:
+	kubectl get pods -n $(NAMESPACE) -w
+
+logs:
+	kubectl logs -n $(NAMESPACE) -l app=leddit --tail=100 -f
+
+# -------------------------
 # STUFF
 # -------------------------
 clean:
 	cd services/community-service && docker compose down --remove-orphans
 	cd api-gateway && docker compose down --remove-orphans
+
+
