@@ -11,11 +11,11 @@ docker-compose up --build -d
 ## How to run unit tests
 
 ```bash
-docker-compose run --rm unit-tests
+docker compose -f docker-compose.test.yml run --rm unit-tests
 ```
 
 ## How to run integration tests
 
 ```bash
-docker-compose run --rm integration-tests
+docker compose -f docker-compose.test.yml run --rm integration-tests
 ```
