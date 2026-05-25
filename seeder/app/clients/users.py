@@ -2,5 +2,5 @@ from .base import BaseClient
 
 
 class UserClient(BaseClient):
-    async def create(self, data):
-        return await self.post("/users", data)
+    async def get_profile(self):
+        return await self.get("/users/me")

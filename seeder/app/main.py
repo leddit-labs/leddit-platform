@@ -10,42 +10,65 @@ from app.clients.posts import PostClient
 from app.clients.comments import CommentClient
 from app.clients.votes import VoteClient
 from app.config import endpoints
+from app.clients.auth import get_token
+
 
 async def run():
     print("Seeder starting...")
     await wait_for_services()
 
-    state = SeedState()
+    state = SeedState() # will save the current state of every created object in all DB's
 
-    users = UserClient(endpoints.USERS)
-    communities = CommunityClient(endpoints.COMMUNITIES)
-    posts = PostClient(endpoints.POSTS)
-    comments = CommentClient(endpoints.COMMENTS)
-    votes = VoteClient(endpoints.VOTES)
-
-    """
-
+    
+    # TODO users should also be created here and added to the state together with their token
+    
     # -------------------
-    # 1. USERS
+    # USERS
     # -------------------
-    for _ in range(5):
-        u = await users.create(user())
-        state.users.append(u)
+    # for _ in range(5):
+    #    u = await users.create(user())
+    #    state.users.append(u)
+
+    # 1. GET TOKEN
+    current_token = await get_token("testuser", "leddit123")
+    user_client = UserClient(endpoints.USERS, current_token)
+    
+    # get user and append
+    current_user = await user_client.get_profile()
+    state.users.append(current_user)
 
     # -------------------
     # 2. COMMUNITIES
     # -------------------
-    for _ in range(3):
+    communities = CommunityClient(endpoints.COMMUNITIES, current_token)
+    for _ in range(1):
         c = await communities.create(community())
         state.communities.append(c)
 
     # -------------------
     # 3. POSTS
     # -------------------
+    # every user makes 1 post to every community
+    posts = PostClient(endpoints.POSTS, current_token)
+
     for c in state.communities:
         for u in state.users:
             p = await posts.create(post(c["id"], u["id"]))
             state.posts.append(p)
+
+    print(state)
+    """
+    
+    
+    comments = CommentClient(endpoints.COMMENTS, token)
+    votes = VoteClient(endpoints.VOTES, token)
+
+
+
+
+
+
+
 
     # -------------------
     # 4. COMMENTS
@@ -67,7 +90,6 @@ async def run():
             })
 """
     print("done for now")
-    
 
 
 if __name__ == "__main__":

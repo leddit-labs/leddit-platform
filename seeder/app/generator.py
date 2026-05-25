@@ -16,12 +16,14 @@ def community():
     }
 
 def post(community_id, user_id):
-    return {
+    post = {
         "community_id": community_id,
         "user_id": user_id,
         "title": fake.sentence(),
         "content": fake.text()
     }
+    print(post)
+    return post
 
 def comment(post_id, user_id):
     return {
