@@ -5,7 +5,7 @@ COMPOSE = docker compose \
 
 NAMESPACE := leddit
 
-.PHONY: build clean down network ps gateway-up kube-script kube-up kube-down kube-nuke
+.PHONY: build clean down network ps gateway-up kube-script kube-up kube-down kube-nuke start stop destroy forward forward-app
 
 # -------------------------
 # HELPERS
@@ -90,20 +90,26 @@ down: gateway-down community-down rabbit-down post-down comment-down user-down v
 # Kubernetes
 # -------------------------
 
-kube-up:
+kube-setup:
 	powershell -ExecutionPolicy Bypass -File k8s\scripts\setup.ps1
 
-kube-down:
-	kubectl delete namespace $(NAMESPACE) --ignore-not-found=true
+start:
+	minikube start
+	@echo "Cluster is running. Use 'make status' to check pods."
 
-status:
-	kubectl get all -n $(NAMESPACE)
+stop:
+	minikube stop
 
-pods:
-	kubectl get pods -n $(NAMESPACE) -w
+destroy:
+	@echo "This will delete the minikube cluster and ALL data."
+	@read -p "Are you sure? [y/N] " confirm && [ "$$confirm" = "y" ] || exit 1
+	minikube delete
 
-logs:
-	kubectl logs -n $(NAMESPACE) -l app=leddit --tail=100 -f
+status: ## Show all pods in the leddit namespace
+	kubectl -n $(NAMESPACE) get pods
+ 
+watch: ## Watch pods in real time
+	kubectl -n $(NAMESPACE) get pods -w
 
 forward: ## Port-forward the good stuff (frontend, apisix, grafana, keycloak, rabbitmq, alloy)
 	@echo "Starting port-forwards... (Ctrl+C to stop all)"
@@ -132,7 +138,6 @@ forward-app: ## Port-forward only frontend + APISIX
 	@echo "  API:       http://localhost:9080"
 	@echo ""
 	@wait
-
 
 # -------------------------
 # STUFF

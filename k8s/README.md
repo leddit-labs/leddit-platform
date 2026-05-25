@@ -24,6 +24,22 @@ winget install Helm.Helm
 
 ## Usage Guidelines
 
+### STARTING AND STOPPING THE CLUSTER
+
+The minikube node can be started with
+
+```bash
+make start # (or minikube start)
+make stop # (or minikube stop)
+```
+
+After starting the node, give it a few minutes and then check with:
+
+```bash
+make status # See all pods
+make watch # Watch all pods in real time
+```
+
 ### PORT-FORWARDING
 
 Needs port-forwarding for app to work:
@@ -47,7 +63,12 @@ The other port-forwards are only for admin/debug access:
 | RabbitMQ Management UI | 15672 | For monitoring RabbitMQ queues and exchanges |
 | Alloy UI               | 12345 | For monitoring KEDA and HPA metrics          |
 
-### STARTING AND STOPPING THE CLUSTER
+Use our Makefile scripts to forward ports:
+
+```bash
+make forward # All the good stuff from above
+make forward-app # ONLY Frontend and APISIX
+```
 
 ## Horizontal Pod Scaling
 
@@ -66,4 +87,3 @@ Remove everything in namespace:
 ```bash
 kubectl delete namespace leddit
 ```
-
