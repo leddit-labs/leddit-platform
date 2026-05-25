@@ -1,0 +1,21 @@
+# --- KEDA ScaledObject for integrity-service ---
+# Scales based on RabbitMQ queue depth instead of CPU
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: integrity-service
+  namespace: leddit
+spec:
+  scaleTargetRef:
+    name: integrity-service
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  cooldownPeriod: 30
+  triggers:
+    - type: rabbitmq
+      metadata:
+        # TODO: update queueName to match your actual moderation queue
+        queueName: moderation-queue
+        host: amqp://guest:guest@rabbitmq.leddit.svc.cluster.local:5672/
+        mode: QueueLength
+        value: "5"
