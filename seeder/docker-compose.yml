@@ -1,0 +1,17 @@
+services:
+  seeder:
+    build: .
+    container_name: seeder
+    networks:
+      - leddit-network
+    environment:
+      USERS_URL: http://user-service:8001
+      COMMUNITIES_URL: http://community-service:8000
+      POSTS_URL: http://post-service:8000
+      COMMENTS_URL: http://comment-service:8003
+      VOTES_URL: http://vote-write-api:8004
+      KEYCLOAK_URL: http://keycloak:8080
+
+networks:
+  leddit-network:
+    external: true
