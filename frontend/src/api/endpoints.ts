@@ -19,7 +19,8 @@ export const endpoints = {
   },
 
   communities: {
-
+    all: `${API_PREFIX}/communities`,
+    byId: (id: string) => `${API_PREFIX}/communities/${id}`,
   },
 
   //and so on

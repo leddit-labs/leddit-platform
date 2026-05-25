@@ -2,12 +2,15 @@ import { Box, Text, VStack, IconButton,} from "@chakra-ui/react";
 import type { Post } from "../../api/domain/posts/post";
 import { formatDate } from "../../util/date";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { useCommunity } from "../../api/domain/community/useCommunity";
 
 type Props = {
   post: Post;
 };
 
 export default function PostCard({ post }: Props) {
+const { data: community } = useCommunity(post.community_id);
+
   function handleUpvote() {
     // TODO
   }
