@@ -1,10 +1,12 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from jose import jwt, JWTError
 from jose import jwk
 import httpx
 from app.config import settings
 import logging
+import base64
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,45 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 _cached_keys = None
+
+async def get_current_user_from_gateway(
+    authorization: str = Header(None),
+):
+    """
+    Token already validated by APISIX.
+    Just decode the payload without verifying signature.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authorization header"
+        )
+    
+    token = authorization.split(" ")[1]
+
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (4 - len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload)
+        user_data = json.loads(decoded)
+        
+        sub = user_data.get("sub")
+        if not sub:
+            import hashlib
+            iss = user_data.get("iss", "keycloak")
+            username = user_data.get("preferred_username", "unknown")
+            sub = hashlib.sha256(f"{iss}:{username}".encode()).hexdigest()[:36]
+
+        return {
+            "sub": sub,
+            "username": user_data.get("preferred_username"),
+            "email": user_data.get("email"),
+        }
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token format"
+        )
 
 async def get_public_keys() -> list:
     """Fetch ALL Keycloak public keys with caching."""

@@ -4,22 +4,37 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User
 from app.schemas import UserProfile, UserUpdate
-from app.security import get_current_user
+from app.security import get_current_user_from_gateway
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me", response_model=UserProfile)
-async def get_my_profile(user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def get_my_profile(
+    user=Depends(get_current_user_from_gateway),
+    db: AsyncSession = Depends(get_db)
+):
     """Get current user's profile. Creates user if first time."""
-    result = await db.execute(select(User).where(User.keycloak_id == user["sub"]))
+    
+    # Debug log
+    logger.info(f"User from token: sub={user.get('sub')}, username={user.get('username')}")
+    
+    if not user.get("sub"):
+        raise HTTPException(status_code=400, detail="Token missing user ID (sub)")
+    
+    result = await db.execute(
+        select(User).where(User.keycloak_id == user["sub"])
+    )
     db_user = result.scalar_one_or_none()
     
     if not db_user:
         db_user = User(
             id=user["sub"],
             keycloak_id=user["sub"],
-            username=user["username"],
-            display_name=user["username"],
+            username=user.get("username", "unknown"),
+            display_name=user.get("username", "unknown"),
         )
         db.add(db_user)
         await db.commit()
@@ -30,11 +45,17 @@ async def get_my_profile(user=Depends(get_current_user), db: AsyncSession = Depe
 @router.patch("/me", response_model=UserProfile)
 async def update_profile(
     update: UserUpdate,
-    user=Depends(get_current_user),
+    user=Depends(get_current_user_from_gateway),
     db: AsyncSession = Depends(get_db)
 ):
     """Update display name or bio."""
-    result = await db.execute(select(User).where(User.keycloak_id == user["sub"]))
+    
+    if not user.get("sub"):
+        raise HTTPException(status_code=400, detail="Token missing user ID")
+    
+    result = await db.execute(
+        select(User).where(User.keycloak_id == user["sub"])
+    )
     db_user = result.scalar_one_or_none()
     
     if not db_user:

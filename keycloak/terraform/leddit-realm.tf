@@ -19,7 +19,7 @@ resource "keycloak_openid_client" "leddit_frontend" {
 
   access_type = "PUBLIC"
   standard_flow_enabled = true
-  direct_access_grants_enabled = true #made this true for testing purposes
+  direct_access_grants_enabled = true
 
   valid_redirect_uris = [
     "http://localhost:3000/*",
@@ -32,6 +32,48 @@ resource "keycloak_openid_client" "leddit_frontend" {
   ]
 }
 
+resource "keycloak_openid_client_default_scopes" "frontend_scopes" {
+  realm_id  = keycloak_realm.leddit.id
+  client_id = keycloak_openid_client.leddit_frontend.id
+
+  default_scopes = [
+    "profile",
+    "email",
+    "roles",
+    "web-origins",
+  ]
+}
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "sub_mapper" {
+  realm_id         = keycloak_realm.leddit.id
+  client_id        = keycloak_openid_client.leddit_frontend.id
+  name             = "sub"
+  user_attribute   = "id"                    # Changed from "username"
+  claim_name       = "sub"
+  add_to_access_token = true
+  add_to_id_token     = true
+}
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "email_mapper" {
+  realm_id         = keycloak_realm.leddit.id
+  client_id        = keycloak_openid_client.leddit_frontend.id
+  name             = "email"
+  user_attribute   = "email"
+  claim_name       = "email"
+  add_to_access_token = true
+  add_to_id_token     = true
+}
+
+resource "keycloak_openid_user_attribute_protocol_mapper" "username_mapper" {
+  realm_id         = keycloak_realm.leddit.id
+  client_id        = keycloak_openid_client.leddit_frontend.id
+  name             = "username"
+  user_attribute   = "username"
+  claim_name       = "preferred_username"
+  add_to_access_token = true
+  add_to_id_token     = true
+}
+
 resource "keycloak_openid_client" "leddit_api" {
   realm_id  = keycloak_realm.leddit.id
   client_id = "leddit-api"
@@ -40,7 +82,40 @@ resource "keycloak_openid_client" "leddit_api" {
   access_type = "CONFIDENTIAL"
   service_accounts_enabled = true
   standard_flow_enabled = false
-  direct_access_grants_enabled = true #i enabled this for postman testing
+  direct_access_grants_enabled = true
+
+  client_secret = "leddit-api-dev-secret-123"  # Fixed for development
+}
+
+data "keycloak_openid_client" "realm_management" {
+  realm_id  = keycloak_realm.leddit.id
+  client_id = "realm-management"
+}
+
+data "keycloak_role" "view_users" {
+  realm_id  = keycloak_realm.leddit.id
+  client_id = data.keycloak_openid_client.realm_management.id
+  name      = "view-users"
+}
+
+data "keycloak_role" "query_users" {
+  realm_id  = keycloak_realm.leddit.id
+  client_id = data.keycloak_openid_client.realm_management.id
+  name      = "query-users"
+}
+
+resource "keycloak_openid_client_service_account_role" "leddit_api_view_users" {
+  realm_id                = keycloak_realm.leddit.id
+  service_account_user_id = keycloak_openid_client.leddit_api.service_account_user_id
+  client_id               = data.keycloak_openid_client.realm_management.id
+  role                    = "view-users"
+}
+
+resource "keycloak_openid_client_service_account_role" "leddit_api_query_users" {
+  realm_id                = keycloak_realm.leddit.id
+  service_account_user_id = keycloak_openid_client.leddit_api.service_account_user_id
+  client_id               = data.keycloak_openid_client.realm_management.id
+  role                    = "query-users"
 }
 
 resource "keycloak_user" "test_user" {
