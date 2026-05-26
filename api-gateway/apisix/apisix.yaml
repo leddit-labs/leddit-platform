@@ -32,7 +32,7 @@ routes:
       openid-connect:
         client_id: "leddit-api"
         client_secret: "leddit-api-dev-secret-123"
-        discovery: "http://localhost:9080/auth/realms/leddit/.well-known/openid-configuration"
+        discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
         bearer_only: true
         realm: "leddit"
       proxy-rewrite:
@@ -47,8 +47,8 @@ routes:
   # ────────────────────────────────────────────
   #  keycloak auth
   # ────────────────────────────────────────────
-  - id: keycloak-token
-    uri: /auth/protocol/openid-connect/token
+  - id: keycloak-auth
+    uri: /auth/*
     plugins:
       proxy-rewrite:
         regex_uri:
@@ -59,8 +59,15 @@ routes:
       nodes:
         "keycloak:8080": 1
 
-  - id: keycloak-auth
-    uri: /auth/*
+  - id: keycloak-internal
+    uri: /realms/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  - id: keycloak-resources
+    uri: /resources/*
     upstream:
       type: roundrobin
       nodes:
@@ -92,7 +99,7 @@ routes:
       openid-connect:
         client_id: "leddit-api"
         client_secret: "leddit-api-dev-secret-123"
-        discovery: "http://localhost:9080/auth/realms/leddit/.well-known/openid-configuration"
+        discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
         bearer_only: true
       proxy-rewrite:
         regex_uri:

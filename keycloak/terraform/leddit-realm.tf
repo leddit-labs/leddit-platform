@@ -10,6 +10,10 @@ resource "keycloak_realm" "leddit" {
   login_with_email_allowed       = true
   reset_password_allowed         = true
   edit_username_allowed          = false
+
+  attributes = {
+    frontend_url = "http://localhost:9080"
+  }
 }
 
 resource "keycloak_openid_client" "leddit_frontend" {
@@ -30,6 +34,15 @@ resource "keycloak_openid_client" "leddit_frontend" {
     "http://localhost:3000",
     "http://localhost:5173",
   ]
+}
+
+resource "keycloak_openid_audience_protocol_mapper" "leddit_api_audience" {
+  realm_id  = keycloak_realm.leddit.id
+  client_id = keycloak_openid_client.leddit_frontend.id
+  name      = "leddit-api-audience"
+  
+  included_client_audience = "leddit-api"
+  add_to_access_token      = true
 }
 
 resource "keycloak_openid_client_default_scopes" "frontend_scopes" {

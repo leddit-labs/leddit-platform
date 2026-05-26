@@ -27,9 +27,10 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KC_HEALTH_ENABLED: true
+      KC_HOSTNAME: http://localhost:9080
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
     ports:
       - "8080:8080"
       - "9000:9000"
