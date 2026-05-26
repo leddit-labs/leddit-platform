@@ -1,11 +1,14 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Alert, AlertIcon, Container } from "@chakra-ui/react";
 import Navbar from "./components/Navbar";
+import Callback from "./pages/Callback";
 import { usePosts } from "./api/domain/posts/usePosts";
 import { useState } from "react";
 import PostGrid from "./components/posts/PostGrid";
 import PostPagination from "./components/posts/PostPagination";
 
-function App() {
+function HomePage() {
+
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isError } = usePosts(page, 5);
@@ -35,6 +38,17 @@ function App() {
         />
       </Container>
     </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/callback" element={<Callback />} />
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

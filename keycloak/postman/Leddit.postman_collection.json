@@ -7,11 +7,11 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8001"
+      "value": "http://localhost:9080"
     },
     {
       "key": "keycloak_url",
-      "value": "http://localhost:8080"
+      "value": "http://localhost:9080"
     },
     {
       "key": "access_token",
@@ -96,9 +96,9 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/users/me",
+          "raw": "{{base_url}}/api/v1/users/me",
           "host": ["{{base_url}}"],
-          "path": ["users", "me"]
+          "path": ["api", "v1", "users", "me"]
         }
       }
     },
@@ -135,9 +135,9 @@
           "raw": "{\n  \"display_name\": \"Leddit Pioneer\",\n  \"bio\": \"First user on Leddit!\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/users/me",
+          "raw": "{{base_url}}/api/v1/users/me",
           "host": ["{{base_url}}"],
-          "path": ["users", "me"]
+          "path": ["api", "v1", "users", "me"]
         }
       }
     },
@@ -165,9 +165,9 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/users/{{user_id}}",
+          "raw": "{{base_url}}/api/v1/users/{{user_id}}",
           "host": ["{{base_url}}"],
-          "path": ["users", "{{user_id}}"]
+          "path": ["api", "v1","users", "{{user_id}}"]
         }
       }
     },
@@ -210,9 +210,9 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{base_url}}/users/me",
+          "raw": "{{base_url}}/api/v1/users/me",
           "host": ["{{base_url}}"],
-          "path": ["users", "me"]
+          "path": ["api", "v1", "users", "me"]
         }
       }
     }

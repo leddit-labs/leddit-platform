@@ -6,6 +6,9 @@ apisix:
       key: leddit-admin-key-change-me # TODO: CHANGE THIS
       role: admin
 
+nginx_config:
+  error_log_level: debug
+
 deployment:
   role: data_plane
   role_data_plane:
