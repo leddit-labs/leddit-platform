@@ -16,7 +16,7 @@ routes:
   # ────────────────────────────────────────────
   #  Community Service
   # ────────────────────────────────────────────
- 
+
   # Public
   - id: community-service-read
     uri: /api/v1/communities*
@@ -30,7 +30,7 @@ routes:
       type: roundrobin
       nodes:
         "community-service:8000": 1
- 
+
   # Protected
   - id: community-service-write
     uri: /api/v1/communities*
@@ -60,17 +60,30 @@ routes:
   #  keycloak auth
   # ────────────────────────────────────────────
   - id: keycloak-auth
-    uri: /auth*
+    uri: /auth/*
     plugins:
       proxy-rewrite:
         regex_uri:
-          - "^/auth/(.*)"
-          - "/realms/leddit/$1"
+          - "^/auth(.*)"
+          - "/realms/leddit$1"
     upstream:
       type: roundrobin
       nodes:
         "keycloak:8080": 1
 
+  - id: keycloak-internal
+    uri: /realms/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  - id: keycloak-resources
+    uri: /resources/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
   # ────────────────────────────────────────────
   #  Other services
   # ────────────────────────────────────────────

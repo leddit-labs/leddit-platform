@@ -1,4 +1,5 @@
 import { Box, Button, Flex, Input, Image } from "@chakra-ui/react";
+import { login } from "../utils/auth";
 
 export default function Navbar() {
   return (
@@ -20,7 +21,9 @@ export default function Navbar() {
         </Box>
 
         <Box>
-          <Button colorScheme="teal">Login</Button>
+          <Button colorScheme="teal" onClick={login}>
+            Login
+          </Button>
         </Box>
       </Flex>
     </Box>

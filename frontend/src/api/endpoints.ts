@@ -6,8 +6,11 @@ const API_PREFIX = "/api/v1"; // if we have a version or other prefix. for examp
 export const endpoints = {
   //here u go wenmin add your endpoints here pls
   auth: {
-    login: "",
-    logout: "",
+    login: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/auth`,
+    logout: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/logout`,
+    token: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/token`,
+    register: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/registrations`,
+    userinfo: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/userinfo`,
   },
 
   posts: {
