@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     rabbitmq_pass: str = "guest"
 
     elasticsearch_url: str = "http://elasticsearch:9200"
-    elasticsearch_index: str = "leddit-posts"
+    elasticsearch_post_index: str = "leddit-posts"
+    elasticsearch_community_index: str = "leddit-communities"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

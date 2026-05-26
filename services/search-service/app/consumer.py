@@ -2,13 +2,28 @@ import asyncio
 import json
 import logging
 import time
+from typing import Callable
 
 from app.messaging import get_consumer_channel
-from app.search_index import ensure_post_index, index_post
+from app.search_index import (
+    ensure_post_index,
+    index_post,
+    delete_post,
+    ensure_community_index,
+    index_community,
+    delete_community,
+)
 
 
-QUEUE_NAME = "search_post_created"
-BINDING_KEY = "post_created"
+QUEUE_NAME = "search_events"
+BINDING_KEYS = [
+    "post_created",
+    "post_updated",
+    "post_deleted",
+    "community_created",
+    "community_updated",
+    "community_deleted",
+]
 
 RETRY_DELAY = 10
 MAX_MESSAGE_RETRIES = 3
@@ -27,7 +42,8 @@ def _consume_loop():
         connection = None
         try:
             ensure_post_index()
-            connection, channel = get_consumer_channel(QUEUE_NAME, BINDING_KEY)
+            ensure_community_index()
+            connection, channel = get_consumer_channel(QUEUE_NAME, BINDING_KEYS)
             logger.info("Connected to RabbitMQ")
 
             channel.basic_consume(queue=QUEUE_NAME, on_message_callback=_on_message)
@@ -40,33 +56,64 @@ def _consume_loop():
                 connection.close()
 
 
+def _reject_dlq(channel, method):
+    try:
+        channel.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
+    except Exception:
+        channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+
+
+def _process_with_retries(channel, method, handler: Callable[[dict], None], event: dict):
+    for attempt in range(1, MAX_MESSAGE_RETRIES + 1):
+        try:
+            handler(event)
+            channel.basic_ack(delivery_tag=method.delivery_tag)
+            return
+        except Exception:
+            logger.exception("Handler attempt failed", extra={"attempt": attempt})
+            if attempt < MAX_MESSAGE_RETRIES:
+                time.sleep(attempt)
+
+    logger.error("Handler failed after retries; sending to DLQ")
+    _reject_dlq(channel, method)
+
+
 def _on_message(channel, method, properties, body):
+    routing_key = getattr(method, "routing_key", None)
     try:
         event = json.loads(body)
-        post_id = event.get("u_id")
-
-        if not post_id:
-            raise ValueError("Missing post id")
-
-        for attempt in range(1, MAX_MESSAGE_RETRIES + 1):
-            try:
-                index_post(event)
-                logger.info("Indexed post_created", extra={"post_id": post_id})
-                channel.basic_ack(delivery_tag=method.delivery_tag) #tells rabbitmq it was success = remove message from queue
-                return
-            except Exception:
-                logger.exception("Processing attempt failed", extra={"attempt": attempt})
-                if attempt < MAX_MESSAGE_RETRIES:
-                    time.sleep(attempt)
-
-        logger.error("Failed to process message after retries; sending to DLQ", extra={"post_id": post_id})
-        try:
-            channel.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
-        except Exception:
-            channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
     except Exception:
-        logger.exception("Failed to process message; sending to DLQ")
-        try:
-            channel.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
-        except Exception:
-            channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+        logger.exception("Invalid JSON in message; sending to DLQ")
+        _reject_dlq(channel, method)
+        return
+
+    if routing_key in ("post_created", "post_updated"):
+        _process_with_retries(channel, method, lambda ev: index_post(ev), event)
+        return
+
+    if routing_key == "post_deleted":
+        def _del(ev: dict):
+            u_id = ev.get("u_id")
+            if not u_id:
+                raise ValueError("missing u_id")
+            delete_post(u_id)
+
+        _process_with_retries(channel, method, _del, event)
+        return
+
+    if routing_key in ("community_created", "community_updated"):
+        _process_with_retries(channel, method, lambda ev: index_community(ev), event)
+        return
+
+    if routing_key == "community_deleted":
+        def _cdel(ev: dict):
+            u_id = ev.get("u_id")
+            if not u_id:
+                raise ValueError("missing u_id")
+            delete_community(u_id)
+
+        _process_with_retries(channel, method, _cdel, event)
+        return
+
+    logger.warning("Unhandled routing key; acking", extra={"routing_key": routing_key})
+    channel.basic_ack(delivery_tag=method.delivery_tag)
