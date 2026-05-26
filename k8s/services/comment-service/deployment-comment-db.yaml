@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-db
+  namespace: leddit
+  labels:
+    app: comment-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comment-db
+  template:
+    metadata:
+      labels:
+        app: comment-db
+    spec:
+      containers:
+        - name: neo4j
+          image: neo4j:5.22
+          ports:
+            - containerPort: 7474
+              name: http
+            - containerPort: 7687
+              name: bolt
+          env:
+            - name: NEO4J_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: comment-db-secret
+                  key: NEO4J_AUTH
+            - name: NEO4J_server_memory_heap_max__size
+              value: "256m"
+            - name: NEO4J_server_memory_pagecache_size
+              value: "128m"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              cpu: 500m
+              memory: 2Gi
+          readinessProbe:
+            exec:
+              command: [cypher-shell, -u, neo4j, -p, leddit123, "RETURN 1"]
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: comment-db-data

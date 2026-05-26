@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: integrity-service
+  namespace: leddit
+  labels:
+    app: integrity-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: integrity-service
+  template:
+    metadata:
+      labels:
+        app: integrity-service
+        logging_job: leddit
+    spec:
+      containers:
+        - name: integrity-service
+          image: leddit/integrity-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASS
+              value: guest
+            - name: DEEPSEEK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: integrity-secret
+                  key: DEEPSEEK_API_KEY
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi

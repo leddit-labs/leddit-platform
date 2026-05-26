@@ -26,3 +26,11 @@ class CommentResponse(BaseModel):
     deleted_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+
+class CommentVersion(BaseModel):
+    version_id: str
+    content: str = Field(min_length=1, max_length=5000)
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

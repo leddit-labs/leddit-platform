@@ -7,3 +7,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 app.include_router(vote_router)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

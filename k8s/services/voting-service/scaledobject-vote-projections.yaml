@@ -1,0 +1,20 @@
+# --- KEDA ScaledObject for vote-projections ---
+# Scales based on RabbitMQ queue depth instead of CPU
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: vote-projections
+  namespace: leddit
+spec:
+  scaleTargetRef:
+    name: vote-projections
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  cooldownPeriod: 30
+  triggers:
+    - type: rabbitmq
+      metadata:
+        queueName: vote_projections
+        host: amqp://guest:guest@rabbitmq.leddit.svc.cluster.local:5672/
+        mode: QueueLength
+        value: "10"
