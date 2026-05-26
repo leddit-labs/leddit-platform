@@ -51,6 +51,16 @@ class PostService:
             return None
 
         updated_post = self.repo.update(db, post_to_update, update)
+        publish_event(
+            "post_updated",
+            {
+                "u_id": str(updated_post.u_id),
+                "community_id": str(updated_post.community_id),
+                "author_id": str(updated_post.author_id),
+                "title": updated_post.title,
+                "content": updated_post.content,
+            },
+        )
         return self._to_out(updated_post)
 
     def delete_post(self, db: Session, post_u_id) -> PostOut:
@@ -59,7 +69,12 @@ class PostService:
             return None
 
         deleted_post = self.repo.delete(db, post)
-
+        publish_event(
+            "post_deleted",
+                {
+                    "u_id": str(deleted_post.u_id)
+                }
+        )
         return self._to_out(deleted_post)
 
     # helper functions below
