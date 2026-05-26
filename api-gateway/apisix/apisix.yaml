@@ -64,8 +64,8 @@ routes:
     plugins:
       proxy-rewrite:
         regex_uri:
-          - "^/auth(.*)"
-          - "/realms/leddit$1"
+          - "^/auth/(.*)"
+          - "/realms/leddit/$1"
     upstream:
       type: roundrobin
       nodes:

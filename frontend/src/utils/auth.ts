@@ -55,17 +55,23 @@ export async function handleCallback(): Promise<void> {
 
   const verifier = sessionStorage.getItem("pkce_verifier");
 
-  const response = await fetch(endpoints.auth.token, {
+  const response = await fetch("http://localhost:9080/auth/protocol/openid-connect/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "authorization_code",
-      client_id: CLIENT_ID,
+      client_id: "leddit-frontend",
       code: code!,
-      redirect_uri: REDIRECT_URI,
+      redirect_uri: window.location.origin + "/callback",
       code_verifier: verifier!,
     }),
   });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("Token exchange failed:", error);
+    throw new Error("Token exchange failed");
+  }
 
   const tokens = await response.json();
 
@@ -97,6 +103,10 @@ export async function logout(): Promise<void> {
 
 export function isAuthenticated(): boolean {
   return !!localStorage.getItem("access_token");
+}
+
+export function getUsername(): string | null {
+  return localStorage.getItem("username");
 }
 
 export async function getUserInfo(): Promise<any> {
