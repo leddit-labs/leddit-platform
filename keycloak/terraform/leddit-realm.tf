@@ -16,6 +16,9 @@ resource "keycloak_realm" "leddit" {
   }
 }
 
+# ============================================
+# Frontend Client
+# ============================================
 resource "keycloak_openid_client" "leddit_frontend" {
   realm_id  = keycloak_realm.leddit.id
   client_id = "leddit-frontend"
@@ -36,6 +39,28 @@ resource "keycloak_openid_client" "leddit_frontend" {
   ]
 }
 
+# ============================================
+# Profile Mapper
+# ============================================
+data "keycloak_openid_client_scope" "profile" {
+  realm_id = keycloak_realm.leddit.id
+  name     = "profile"
+}
+
+# Use a user property mapper instead of user attribute mapper
+resource "keycloak_openid_user_property_protocol_mapper" "sub_mapper" {
+  realm_id        = keycloak_realm.leddit.id
+  client_scope_id = data.keycloak_openid_client_scope.profile.id
+  name            = "sub"
+  user_property    = "id"       # This is the correct property name
+  claim_name      = "sub"
+  add_to_access_token = true
+  add_to_id_token     = true
+}
+
+# ============================================
+# Audience Mapper - allows leddit-api to introspect tokens
+# ============================================
 resource "keycloak_openid_audience_protocol_mapper" "leddit_api_audience" {
   realm_id  = keycloak_realm.leddit.id
   client_id = keycloak_openid_client.leddit_frontend.id
@@ -45,6 +70,9 @@ resource "keycloak_openid_audience_protocol_mapper" "leddit_api_audience" {
   add_to_access_token      = true
 }
 
+# ============================================
+# Default Client Scopes
+# ============================================
 resource "keycloak_openid_client_default_scopes" "frontend_scopes" {
   realm_id  = keycloak_realm.leddit.id
   client_id = keycloak_openid_client.leddit_frontend.id
@@ -57,36 +85,9 @@ resource "keycloak_openid_client_default_scopes" "frontend_scopes" {
   ]
 }
 
-resource "keycloak_openid_user_attribute_protocol_mapper" "sub_mapper" {
-  realm_id         = keycloak_realm.leddit.id
-  client_id        = keycloak_openid_client.leddit_frontend.id
-  name             = "sub"
-  user_attribute   = "id"                    # Changed from "username"
-  claim_name       = "sub"
-  add_to_access_token = true
-  add_to_id_token     = true
-}
-
-resource "keycloak_openid_user_attribute_protocol_mapper" "email_mapper" {
-  realm_id         = keycloak_realm.leddit.id
-  client_id        = keycloak_openid_client.leddit_frontend.id
-  name             = "email"
-  user_attribute   = "email"
-  claim_name       = "email"
-  add_to_access_token = true
-  add_to_id_token     = true
-}
-
-resource "keycloak_openid_user_attribute_protocol_mapper" "username_mapper" {
-  realm_id         = keycloak_realm.leddit.id
-  client_id        = keycloak_openid_client.leddit_frontend.id
-  name             = "username"
-  user_attribute   = "username"
-  claim_name       = "preferred_username"
-  add_to_access_token = true
-  add_to_id_token     = true
-}
-
+# ============================================
+# API Client (used by APISIX for introspection)
+# ============================================
 resource "keycloak_openid_client" "leddit_api" {
   realm_id  = keycloak_realm.leddit.id
   client_id = "leddit-api"
@@ -97,9 +98,12 @@ resource "keycloak_openid_client" "leddit_api" {
   standard_flow_enabled = false
   direct_access_grants_enabled = true
 
-  client_secret = "leddit-api-dev-secret-123"  # Fixed for development
+  client_secret = "leddit-api-dev-secret-123"
 }
 
+# ============================================
+# Realm Management Permissions (for introspection)
+# ============================================
 data "keycloak_openid_client" "realm_management" {
   realm_id  = keycloak_realm.leddit.id
   client_id = "realm-management"
