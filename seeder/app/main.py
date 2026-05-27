@@ -30,7 +30,8 @@ async def run():
     #    state.users.append(u)
 
     # 1. GET TOKEN
-    current_token = await get_token("testuser", "leddit123")
+    current_token = await get_token("nademtis", "nademtis")
+    print("token: ", current_token)
     user_client = UserClient(endpoints.USERS, current_token)
     
     # get user and append

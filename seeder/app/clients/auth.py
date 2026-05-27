@@ -1,4 +1,4 @@
-# app/auth.py
+
 import httpx
 
 KEYCLOAK_URL = "http://keycloak:8080"
@@ -12,6 +12,7 @@ async def get_token(username: str, password: str) -> str:
                 "client_id": "leddit-frontend",
                 "username": username,
                 "password": password,
+                "scope": "openid"
             },
         )
         r.raise_for_status()
