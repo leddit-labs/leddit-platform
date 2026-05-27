@@ -20,10 +20,7 @@ _cached_keys = None
 async def get_current_user_from_gateway(
     authorization: str = Header(None),
 ):
-    """
-    Token already validated by APISIX.
-    Just decode the payload without verifying signature.
-    """
+    """Token already validated by APISIX. Extract user from JWT payload."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,18 +35,16 @@ async def get_current_user_from_gateway(
         decoded = base64.urlsafe_b64decode(payload)
         user_data = json.loads(decoded)
         
-        sub = user_data.get("sub")
-        if not sub:
-            import hashlib
-            iss = user_data.get("iss", "keycloak")
-            username = user_data.get("preferred_username", "unknown")
-            sub = hashlib.sha256(f"{iss}:{username}".encode()).hexdigest()[:36]
-
         return {
-            "sub": sub,
+            "sub": user_data["sub"],
             "username": user_data.get("preferred_username"),
             "email": user_data.get("email"),
         }
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token missing required 'sub' claim"
+        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -112,10 +107,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             )
         
         return {
-            "sub": payload.get("sub"),
+            "sub": payload["sub"],
             "username": payload.get("preferred_username"),
             "email": payload.get("email"),
         }
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token missing required 'sub' claim"
+        )
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
