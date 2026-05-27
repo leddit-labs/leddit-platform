@@ -97,3 +97,9 @@ down: gateway-down community-down rabbit-down post-down search-down comment-down
 clean:
 	cd services/community-service && docker compose down --remove-orphans
 	cd api-gateway && docker compose down --remove-orphans
+
+system-test: network
+	docker compose -f tests/system/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from system-tests
+
+system-test-down:
+	docker compose -f tests/system/docker-compose.test.yml down -v --remove-orphans --rmi all
