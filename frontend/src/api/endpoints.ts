@@ -26,6 +26,24 @@ export const endpoints = {
     byId: (id: string) => `${API_PREFIX}/communities/${id}`,
   },
 
+  votes: {
+    postVotes: (postId: string) => `${API_PREFIX}/votes/posts/${postId}`,
+
+    commentVotes: (commentId: string) =>
+      `${API_PREFIX}/votes/comments/${commentId}`,
+
+    myPostVote: (postId: string, userId: string) =>
+      `${API_PREFIX}/votes/posts/${postId}/me?user_id=${userId}`,
+
+    myCommentVote: (commentId: string, userId: string) =>
+      `${API_PREFIX}/votes/comments/${commentId}/me?user_id=${userId}`,
+
+    votePost: (postId: string) => `${API_PREFIX}/votes/posts/${postId}`,
+
+    voteComment: (commentId: string) =>
+      `${API_PREFIX}/votes/comments/${commentId}`,
+  },
+
   //and so on
   //and so on
 };

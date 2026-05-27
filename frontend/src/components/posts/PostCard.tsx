@@ -3,14 +3,16 @@ import type { Post } from "../../api/domain/posts/post";
 import { formatDate } from "../../util/date";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useCommunity } from "../../api/domain/community/useCommunity";
+import { usePostVotes } from "../../api/domain/votes/voteHooks";
 
 type Props = {
   post: Post;
 };
 
 export default function PostCard({ post }: Props) {
-const { data: community } = useCommunity(post.community_id);
-
+//const { data: community } = useCommunity(post.community_id);
+const { data: votes } = usePostVotes(post.u_id);
+const score = votes?.score ?? 0;
   function handleUpvote() {
     // TODO
   }
@@ -39,7 +41,7 @@ const { data: community } = useCommunity(post.community_id);
           onClick={handleUpvote}
         />
 
-        <Text fontWeight="bold">69</Text>
+        <Text fontWeight="bold">{score}</Text>
 
         <IconButton
           aria-label="downvote"
