@@ -1,0 +1,126 @@
+services:
+  apisix:
+    image: apache/apisix:3.9.1-debian
+    environment:
+      OIDC_CLIENT_ID: test-client
+      OIDC_CLIENT_SECRET: test-secret
+    volumes:
+      - ../../api-gateway/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ../../api-gateway/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    ports:
+      - "9080:9080"
+    networks:
+      - leddit-network
+
+  post-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: posts_db
+    volumes:
+      - post_db_test_data:/var/lib/postgresql/data
+    networks:
+      - leddit-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d posts_db"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_test_data:/var/lib/rabbitmq
+    networks:
+      - leddit-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.2
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.enrollment.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    volumes:
+      - search_es_test_data:/usr/share/elasticsearch/data
+    networks:
+      - leddit-network
+
+  post-service:
+    build:
+      context: ../../services/post-service
+    depends_on:
+      post-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@post-db:5432/posts_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: posts_db
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    networks:
+      - leddit-network
+
+  search-service:
+    build:
+      context: ../../services/search-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_POST_INDEX: leddit-posts
+      ELASTICSEARCH_COMMUNITY_INDEX: leddit-communities
+    networks:
+      - leddit-network
+
+  system-tests:
+    build:
+      context: .
+    depends_on:
+      apisix:
+        condition: service_started
+      post-service:
+        condition: service_started
+      search-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      post-db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+    environment:
+      API_GATEWAY_URL: http://apisix:9080
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_MGMT_URL: http://rabbitmq:15672/api/overview
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_POST_INDEX: leddit-posts
+      SYSTEM_TEST_TIMEOUT_SECONDS: 180
+    networks:
+      - leddit-network
+
+volumes:
+  post_db_test_data:
+  rabbitmq_test_data:
+  search_es_test_data:
+
+networks:
+  leddit-network:
+    external: true
