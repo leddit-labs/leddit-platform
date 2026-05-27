@@ -91,6 +91,18 @@ routes:
       nodes:
         "search-service:8000": 1
 
+  - id: search-service-communities-v1
+    uri: /api/v1/search/communities*
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/search/communities(.*)"
+          - "/search/communities$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "search-service:8000": 1
+
   - id: comment-service-v1
     uri: /api/v1/comments*
     upstream:
