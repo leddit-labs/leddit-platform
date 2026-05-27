@@ -54,8 +54,7 @@ export async function handleCallback(): Promise<void> {
   }
 
   const verifier = sessionStorage.getItem("pkce_verifier");
-
-  const response = await fetch("http://localhost:9080/auth/protocol/openid-connect/token", {
+  const response = await fetch(endpoints.auth.token, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({

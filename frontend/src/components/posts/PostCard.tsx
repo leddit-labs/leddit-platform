@@ -1,24 +1,26 @@
-import { Box, Text, VStack, IconButton,} from "@chakra-ui/react";
+import { Box, Text, VStack, IconButton } from "@chakra-ui/react";
 import type { Post } from "../../api/domain/posts/post";
 import { formatDate } from "../../util/date";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useCommunity } from "../../api/domain/community/useCommunity";
-import { usePostVotes } from "../../api/domain/votes/voteHooks";
+import { usePostVotes, useVotePost } from "../../api/domain/votes/voteHooks";
 
 type Props = {
   post: Post;
 };
 
 export default function PostCard({ post }: Props) {
-//const { data: community } = useCommunity(post.community_id);
-const { data: votes } = usePostVotes(post.u_id);
-const score = votes?.score ?? 0;
+  //const { data: community } = useCommunity(post.community_id); //sub error
+  const { data: votes } = usePostVotes(post.u_id);
+  const score = votes?.score ?? 0;
+
+  const voteMutation = useVotePost(post.u_id);
   function handleUpvote() {
-    // TODO
+    voteMutation.mutate(1);
   }
 
   function handleDownvote() {
-    // TODO
+    voteMutation.mutate(-1);
   }
 
   return (

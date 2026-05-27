@@ -9,7 +9,7 @@ export const endpoints = {
     login: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/auth`,
     logout: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/logout`,
     token: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/token`,
-    register: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/registrations`,
+    register: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/registrations`, //not currently used - we can use later for a "register here" button
     userinfo: `${BASE_API_GATEWAY}/auth/protocol/openid-connect/userinfo`,
   },
 
@@ -31,17 +31,19 @@ export const endpoints = {
 
     commentVotes: (commentId: string) =>
       `${API_PREFIX}/votes/comments/${commentId}`,
-
     myPostVote: (postId: string, userId: string) =>
       `${API_PREFIX}/votes/posts/${postId}/me?user_id=${userId}`,
-
     myCommentVote: (commentId: string, userId: string) =>
       `${API_PREFIX}/votes/comments/${commentId}/me?user_id=${userId}`,
-
     votePost: (postId: string) => `${API_PREFIX}/votes/posts/${postId}`,
-
     voteComment: (commentId: string) =>
       `${API_PREFIX}/votes/comments/${commentId}`,
+  },
+
+  users: {
+    me: `${API_PREFIX}/users/me`,
+    updateMe: `${API_PREFIX}/users/me`,
+    byId: (userId: string) => `${API_PREFIX}/users/${userId}`,
   },
 
   //and so on

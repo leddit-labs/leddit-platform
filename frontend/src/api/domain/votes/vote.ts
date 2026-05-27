@@ -1,4 +1,12 @@
 export interface VoteSummary {
+  post_id: string;
+  upvotes: number;
+  downvotes: number;
+  score: number;
+}
+
+export interface CommentVoteSummary {
+  comment_id: string;
   upvotes: number;
   downvotes: number;
   score: number;
@@ -10,5 +18,5 @@ export interface UserVote {
 
 export interface VoteCreate {
   user_id: string;
-  value: number;
+  value: 1 | -1;
 }
