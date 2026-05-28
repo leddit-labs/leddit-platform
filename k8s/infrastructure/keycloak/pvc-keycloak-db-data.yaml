@@ -1,0 +1,11 @@
+# --- Keycloak DB ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: keycloak-db-data
+  namespace: leddit
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi

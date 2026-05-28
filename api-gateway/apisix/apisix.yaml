@@ -4,12 +4,19 @@ global_rules:
       request-id:
         header_name: "X-Request-ID"
         include_in_response: true
-
+  - id: cors-global
+    plugins:
+      cors:
+        allow_origins: "http://localhost:5173"
+        allow_methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+        allow_headers: "*"
+        expose_headers: "*"
+        max_age: 3600
 routes:
   # ────────────────────────────────────────────
   #  Community Service
   # ────────────────────────────────────────────
- 
+
   # Public
   - id: community-service-read
     uri: /api/v1/communities*
@@ -23,7 +30,7 @@ routes:
       type: roundrobin
       nodes:
         "community-service:8000": 1
- 
+
   # Protected
   - id: community-service-write
     uri: /api/v1/communities*
@@ -31,15 +38,10 @@ routes:
     plugins:
       openid-connect:
         client_id: "leddit-api"
-        client_secret: "xg79IufwMOiaA4kQq5CtJJZH26oztka9"
+        client_secret: "leddit-api-dev-secret-123"
         discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
         bearer_only: true
         realm: "leddit"
-        scope: "openid"
-        set_id_token_header: false
-        set_userinfo_header: false
-        set_access_token_header: true
-        access_token_in_authorization_header: true
       proxy-rewrite:
         regex_uri:
           - "^/api/v1/communities(.*)"
@@ -53,7 +55,7 @@ routes:
   #  keycloak auth
   # ────────────────────────────────────────────
   - id: keycloak-auth
-    uri: /auth*
+    uri: /auth/*
     plugins:
       proxy-rewrite:
         regex_uri:
@@ -64,6 +66,56 @@ routes:
       nodes:
         "keycloak:8080": 1
 
+  - id: keycloak-internal
+    uri: /realms/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  - id: keycloak-resources
+    uri: /resources/*
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  # ────────────────────────────────────────────
+  #  User Service
+  # ────────────────────────────────────────────
+
+  # Public
+  - id: user-service-read
+    uri: /api/v1/users*
+    methods: ["GET", "HEAD", "OPTIONS"]
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/users(.*)"
+          - "/users$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "user-service:8001": 1
+
+  # Protected
+  - id: user-service-write
+    uri: /api/v1/users*
+    methods: ["POST", "PUT", "PATCH", "DELETE"]
+    plugins:
+      openid-connect:
+        client_id: "leddit-api"
+        client_secret: "leddit-api-dev-secret-123"
+        discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
+        bearer_only: true
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/users(.*)"
+          - "/users$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "user-service:8001": 1
   # ────────────────────────────────────────────
   #  Other services
   # ────────────────────────────────────────────

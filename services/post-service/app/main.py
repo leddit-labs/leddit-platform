@@ -13,3 +13,8 @@ app = FastAPI()
 
 app.add_middleware(RequestLoggingMiddleware)
 app.include_router(post_router)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

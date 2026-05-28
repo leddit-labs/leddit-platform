@@ -1,10 +1,12 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from jose import jwt, JWTError
 from jose import jwk
 import httpx
 from app.config import settings
 import logging
+import base64
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,40 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 _cached_keys = None
+
+async def get_current_user_from_gateway(
+    authorization: str = Header(None),
+):
+    """Token already validated by APISIX. Extract user from JWT payload."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authorization header"
+        )
+    
+    token = authorization.split(" ")[1]
+
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (4 - len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload)
+        user_data = json.loads(decoded)
+        
+        return {
+            "sub": user_data["sub"],
+            "username": user_data.get("preferred_username"),
+            "email": user_data.get("email"),
+        }
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token missing required 'sub' claim"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token format"
+        )
 
 async def get_public_keys() -> list:
     """Fetch ALL Keycloak public keys with caching."""
@@ -71,10 +107,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             )
         
         return {
-            "sub": payload.get("sub"),
+            "sub": payload["sub"],
             "username": payload.get("preferred_username"),
             "email": payload.get("email"),
         }
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token missing required 'sub' claim"
+        )
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

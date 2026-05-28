@@ -8,6 +8,7 @@ from typing import Any
 from urllib import request, error
 from urllib.parse import quote_plus
 from uuid import uuid4
+import pytest
 
 
 API_GATEWAY_URL = os.getenv("API_GATEWAY_URL")
@@ -87,27 +88,13 @@ def _wait_for_search_result(title_query: str, post_id: str, *, expected_present:
     )
 
 
-def _wait_for_elasticsearch_index(index_name: str) -> None:
-    deadline = time.time() + SYSTEM_TEST_TIMEOUT_SECONDS
-
-    while time.time() < deadline:
-        try:
-            resp = _http_json("GET", f"{ELASTICSEARCH_URL}/{index_name}/_settings")
-            if resp.status == 200:
-                return
-        except Exception:
-            pass
-        time.sleep(10)
-
-    raise AssertionError(f"Timed out waiting for Elasticsearch index {index_name} to exist")
-
-
 def _wait_for_dependencies() -> None:
     _wait_until_ready(f"{API_GATEWAY_URL}/api/v1/posts")
     _wait_until_ready(f"{API_GATEWAY_URL}/api/v1/search/posts?q=title")
     _wait_until_ready(ELASTICSEARCH_URL)
-    _wait_for_elasticsearch_index(ELASTICSEARCH_POST_INDEX)
     _wait_until_ready(RABBITMQ_MGMT_URL, headers={"Authorization": f"Basic {_basic_auth('guest', 'guest')}"})
+    print("All dependencies are ready waiting 1 minute before starting tests...")
+    time.sleep(60)
 
 
 def _basic_auth(username: str, password: str) -> str:
@@ -146,9 +133,12 @@ def _delete_post(post_id: str) -> dict[str, Any]:
     return response.body
 
 
-def test_post_create_is_replicated_to_search_service():
+@pytest.fixture(scope="session", autouse=True)
+def wait_for_dependencies_fixture() -> None:
     _wait_for_dependencies()
 
+
+def test_post_create_is_replicated_to_search_service():
     unique_id = uuid4().hex
     title = f"system-test-created-{unique_id}"
 
@@ -165,8 +155,6 @@ def test_post_create_is_replicated_to_search_service():
 
 
 def test_post_update_is_replicated_to_search_service():
-    _wait_for_dependencies()
-
     unique_id = uuid4().hex
     initial_title = f"system-test-update-initial-{unique_id}"
     updated_title = f"system-test-update-updated-{unique_id}"
@@ -188,8 +176,6 @@ def test_post_update_is_replicated_to_search_service():
 
 
 def test_post_delete_is_replicated_to_search_service():
-    _wait_for_dependencies()
-
     unique_id = uuid4().hex
     title = f"system-test-delete-{unique_id}"
 
