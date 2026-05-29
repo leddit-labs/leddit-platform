@@ -60,9 +60,9 @@
           ]
         },
         "url": {
-          "raw": "{{keycloak_url}}/realms/leddit/protocol/openid-connect/token",
+          "raw": "{{keycloak_url}}/auth/protocol/openid-connect/token",
           "host": ["{{keycloak_url}}"],
-          "path": ["realms", "leddit", "protocol", "openid-connect", "token"]
+          "path": ["auth", "protocol", "openid-connect", "token"]
         }
       }
     },
@@ -188,9 +188,9 @@
       "request": {
         "method": "GET",
         "url": {
-          "raw": "{{base_url}}/users/does-not-exist",
+          "raw": "{{base_url}}/api/v1/users/does-not-exist",
           "host": ["{{base_url}}"],
-          "path": ["users", "does-not-exist"]
+          "path": ["api", "v1", "users", "does-not-exist"]
         }
       }
     },
