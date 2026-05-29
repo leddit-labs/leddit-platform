@@ -156,4 +156,7 @@ test-network:
 	docker network inspect leddit-test-network >/dev/null 2>&1 || docker network create leddit-test-network
 
 system-test: test-network
-	@powershell -NoProfile -Command "$$exitCode = 0; docker compose -f tests/system/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from system-tests; if ($$LASTEXITCODE -ne 0) { $$exitCode = $$LASTEXITCODE }; docker compose -f tests/system/docker-compose.test.yml down -v --remove-orphans | Out-Null; exit $$exitCode"
+	docker compose -f tests/system/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from system-tests
+
+system-test-down:
+	docker compose -f tests/system/docker-compose.test.yml down -v --remove-orphans
