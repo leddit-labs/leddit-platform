@@ -24,6 +24,8 @@ class PostOut(BaseModel):
     title: str
     content: Optional[str]
     # image: Optional[str]
+    community_id: UUID
+    author_id: UUID
     created_at: datetime
     deleted_at: Optional[datetime]
 

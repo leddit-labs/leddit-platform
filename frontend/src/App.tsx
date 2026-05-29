@@ -1,29 +1,42 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Button, Container, Heading } from "@chakra-ui/react";
+import { Alert, AlertIcon, Container } from "@chakra-ui/react";
 import Navbar from "./components/Navbar";
 import Callback from "./pages/Callback";
 import { usePosts } from "./api/domain/posts/usePosts";
+import { useState } from "react";
+import PostGrid from "./components/posts/PostGrid";
+import PostPagination from "./components/posts/PostPagination";
 
 function HomePage() {
-  const { posts, page, loadPosts } = usePosts(1, 3);
+
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading, isError } = usePosts(page, 5);
+
+  const posts = data ?? [];
+
   return (
     <>
       <Navbar />
-      <Container centerContent mt={10}>
-        <Heading mb={4}>Leddit the platform deluxe woop</Heading>
-        <Button color="brand.500">Click here lmao xd</Button>
+
+      <Container maxW="900px" mt={10}>
+        {isError && <div>Something broke</div>}
+
+        <PostGrid posts={posts} isLoading={isLoading} />
+
+        {!isLoading && posts.length === 0 && (
+          <Alert status="warning">
+            <AlertIcon />
+            No more posts returned from API. Add some posts to your postDB my friend
+          </Alert>
+        )}
+
+        <PostPagination
+          page={page}
+          onPrev={() => setPage((p) => Math.max(1, p - 1))}
+          onNext={() => setPage((p) => p + 1)}
+        />
       </Container>
-      <div>
-        <br />
-        <div>This below will only show posts if you have posts in your post db</div>
-        <div>Try Press "Prev" and "Next"</div>
-        <br />
-        <button onClick={() => loadPosts(page - 1)}>Prev</button>
-        <button onClick={() => loadPosts(page + 1)}>Next</button>
-        {posts.map((p) => (
-          <div key={p.u_id}>{p.title}</div>
-        ))}
-      </div>
     </>
   );
 }

@@ -116,6 +116,46 @@ routes:
       type: roundrobin
       nodes:
         "user-service:8001": 1
+
+  # ────────────────────────────────────────────
+  # Vote Service READ - unprotected
+  # ────────────────────────────────────────────
+  - id: vote-service-read
+    uri: /api/v1/votes*
+    methods: ["GET", "HEAD", "OPTIONS"]
+    plugins:
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/votes(.*)"
+          - "/votes$1"
+    upstream:
+      type: roundrobin
+      nodes:
+        "vote-read-api:8005": 1
+
+  # ────────────────────────────────────────────
+  # Vote Service WRITE - protected
+  # ────────────────────────────────────────────
+  - id: vote-service-write
+    uri: /api/v1/votes*
+    methods: ["POST", "PUT", "PATCH", "DELETE"]
+    plugins:
+      openid-connect:
+        client_id: "leddit-api"
+        client_secret: "leddit-api-dev-secret-123"
+        discovery: "http://keycloak:8080/realms/leddit/.well-known/openid-configuration"
+        bearer_only: true
+
+      proxy-rewrite:
+        regex_uri:
+          - "^/api/v1/votes(.*)"
+          - "/votes$1"
+
+    upstream:
+      type: roundrobin
+      nodes:
+        "vote-write-api:8004": 1
+  
   # ────────────────────────────────────────────
   #  Other services
   # ────────────────────────────────────────────
