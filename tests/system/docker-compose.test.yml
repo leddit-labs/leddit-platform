@@ -7,10 +7,8 @@ services:
     volumes:
       - ../../api-gateway/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ../../api-gateway/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
-    ports:
-      - "9080:9080"
     networks:
-      - leddit-network
+      - leddit-test-network
 
   post-db:
     image: postgres:15
@@ -21,7 +19,7 @@ services:
     volumes:
       - post_db_test_data:/var/lib/postgresql/data
     networks:
-      - leddit-network
+      - leddit-test-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d posts_db"]
       interval: 10s
@@ -36,7 +34,7 @@ services:
     volumes:
       - rabbitmq_test_data:/var/lib/rabbitmq
     networks:
-      - leddit-network
+      - leddit-test-network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -53,7 +51,7 @@ services:
     volumes:
       - search_es_test_data:/usr/share/elasticsearch/data
     networks:
-      - leddit-network
+      - leddit-test-network
 
   post-service:
     build:
@@ -69,7 +67,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
     networks:
-      - leddit-network
+      - leddit-test-network
 
   search-service:
     build:
@@ -88,7 +86,7 @@ services:
       ELASTICSEARCH_POST_INDEX: leddit-posts
       ELASTICSEARCH_COMMUNITY_INDEX: leddit-communities
     networks:
-      - leddit-network
+      - leddit-test-network
 
   system-tests:
     build:
@@ -114,7 +112,7 @@ services:
       ELASTICSEARCH_POST_INDEX: leddit-posts
       SYSTEM_TEST_TIMEOUT_SECONDS: 180
     networks:
-      - leddit-network
+      - leddit-test-network
 
 volumes:
   post_db_test_data:
@@ -122,5 +120,5 @@ volumes:
   search_es_test_data:
 
 networks:
-  leddit-network:
+  leddit-test-network:
     external: true

@@ -152,8 +152,11 @@ clean:
 	cd services/community-service && docker compose down --remove-orphans
 	cd api-gateway && docker compose down --remove-orphans
 
-system-test: network
+test-network:
+	docker network inspect leddit-test-network >/dev/null 2>&1 || docker network create leddit-test-network
+
+system-test: test-network
 	docker compose -f tests/system/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from system-tests
 
 system-test-down:
-	docker compose -f tests/system/docker-compose.test.yml down -v --remove-orphans --rmi all
+	docker compose -f tests/system/docker-compose.test.yml down -v --remove-orphans

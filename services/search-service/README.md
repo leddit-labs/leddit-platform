@@ -1,8 +1,9 @@
-# Search Service
+# search-service
 
-Elasticsearch-backed read model for post title search.
+This is the microservice responsible for searching
 
-## Endpoints
+## How to run
 
-- `GET /health`
-- `GET /search/posts?q=...`
+```bash
+docker-compose up --build -d
+```
