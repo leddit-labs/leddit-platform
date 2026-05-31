@@ -1,4 +1,4 @@
-import base64 
+import base64
 import json
 import logging
 
@@ -17,22 +17,23 @@ from app.schemas import (
     RuleOut,
 )
 from app import repository
+from app.messaging import publish_event
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/communities", tags=["communities"])
 
+
 # ----------------------------------------------------
 # HELPER FUNCTIONS
 # ----------------------------------------------------
-def get_current_user(
-    authorization: str | None = Header(None)
-) -> str:
+def get_current_user(authorization: str | None = Header(None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "Missing or invalid authorization")
     token = authorization.split(" ", 1)[1]
     payload = json.loads(base64.urlsafe_b64decode(token.split(".")[1] + "=="))
     return payload["sub"]
+
 
 # ----------------------------------------------------
 # Write protected routes (POST, PUT, PATCH, DELETE)
@@ -47,14 +48,32 @@ def create_community(
         raise HTTPException(409, "Community name already exists")
 
     community = repository.create(db, body, created_by=user_id)
-    logger.info("Community created", extra={"community_id": community.id, "community_name": body.name, "user_id": user_id})
+    logger.info(
+        "Community created",
+        extra={
+            "community_id": community.id,
+            "community_name": body.name,
+            "user_id": user_id,
+        },
+    )
+
+    publish_event(
+        "community.created",
+        {
+            "community_id": community.id,
+            "name": community.name,
+            "description": community.description,
+            "created_by": community.created_by,
+        },
+    )
+
     return community
 
 
 @router.put("/{community_id}", response_model=CommunityOut)
 def update_community(
     community_id: str,
-    body: CommunityUpdate, 
+    body: CommunityUpdate,
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user),
 ):
@@ -62,22 +81,28 @@ def update_community(
     if not community:
         raise HTTPException(404, "Community not found")
     if not repository.is_moderator_or_owner(db, community_id, user_id):
-        logger.warning("Unauthorized change attempt", extra={"community_id": community_id, "user_id": user_id})
+        logger.warning(
+            "Unauthorized change attempt",
+            extra={"community_id": community_id, "user_id": user_id},
+        )
         raise HTTPException(403, "Only moderators can update a community")
     return repository.update(db, community, body)
 
 
 @router.delete("/{community_id}", status_code=204)
 def delete_community(
-        community_id: str,
-        db: Session = Depends(get_db),
-        user_id: str = Depends(get_current_user),
+    community_id: str,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
 ):
     community = repository.get_by_id(db, community_id)
     if not community:
         raise HTTPException(404, "Community not found")
     if not repository.is_owner(db, community_id, user_id):
-        logger.warning("Unauthorized delete attempt", extra={"community_id": community_id, "user_id": user_id})
+        logger.warning(
+            "Unauthorized delete attempt",
+            extra={"community_id": community_id, "user_id": user_id},
+        )
         raise HTTPException(403, "Only the owner can delete a community")
     repository.delete(db, community)
 
@@ -209,4 +234,3 @@ def delete_rule(
     if not rule:
         raise HTTPException(404, "Rule not found")
     repository.delete_rule(db, rule)
-

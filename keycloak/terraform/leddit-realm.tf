@@ -1,7 +1,7 @@
 resource "keycloak_realm" "leddit" {
   realm   = var.realm_name
   enabled = true
-  
+
   display_name = "Leddit"
 
   registration_allowed           = true
@@ -24,8 +24,8 @@ resource "keycloak_openid_client" "leddit_frontend" {
   client_id = "leddit-frontend"
   name      = "Leddit Frontend"
 
-  access_type = "PUBLIC"
-  standard_flow_enabled = true
+  access_type                  = "PUBLIC"
+  standard_flow_enabled        = true
   direct_access_grants_enabled = true
 
   valid_redirect_uris = [
@@ -49,11 +49,11 @@ data "keycloak_openid_client_scope" "profile" {
 
 # Use a user property mapper instead of user attribute mapper
 resource "keycloak_openid_user_property_protocol_mapper" "sub_mapper" {
-  realm_id        = keycloak_realm.leddit.id
-  client_scope_id = data.keycloak_openid_client_scope.profile.id
-  name            = "sub"
-  user_property    = "id"       # This is the correct property name
-  claim_name      = "sub"
+  realm_id            = keycloak_realm.leddit.id
+  client_scope_id     = data.keycloak_openid_client_scope.profile.id
+  name                = "sub"
+  user_property       = "id" # This is the correct property name
+  claim_name          = "sub"
   add_to_access_token = true
   add_to_id_token     = true
 }
@@ -65,7 +65,7 @@ resource "keycloak_openid_audience_protocol_mapper" "leddit_api_audience" {
   realm_id  = keycloak_realm.leddit.id
   client_id = keycloak_openid_client.leddit_frontend.id
   name      = "leddit-api-audience"
-  
+
   included_client_audience = "leddit-api"
   add_to_access_token      = true
 }
@@ -93,9 +93,9 @@ resource "keycloak_openid_client" "leddit_api" {
   client_id = "leddit-api"
   name      = "Leddit API"
 
-  access_type = "CONFIDENTIAL"
-  service_accounts_enabled = true
-  standard_flow_enabled = false
+  access_type                  = "CONFIDENTIAL"
+  service_accounts_enabled     = true
+  standard_flow_enabled        = false
   direct_access_grants_enabled = true
 
   client_secret = "leddit-api-dev-secret-123"
@@ -136,16 +136,46 @@ resource "keycloak_openid_client_service_account_role" "leddit_api_query_users" 
 }
 
 resource "keycloak_user" "test_user" {
-  realm_id   = keycloak_realm.leddit.id
-  username   = "testuser"
-  email      = "test@leddit.local"
-  first_name = "Test"
-  last_name  = "User" 
-  enabled    = true
+  realm_id       = keycloak_realm.leddit.id
+  username       = "testuser"
+  email          = "test@leddit.local"
+  first_name     = "Test"
+  last_name      = "User"
+  enabled        = true
   email_verified = true
 
   initial_password {
     value     = "leddit123"
+    temporary = false
+  }
+}
+
+resource "keycloak_user" "nevermod" {
+  realm_id       = keycloak_realm.leddit.id
+  username       = "nevermod"
+  email          = "nevermod@leddit.local"
+  first_name     = "Never"
+  last_name      = "Mod"
+  enabled        = true
+  email_verified = true
+
+  initial_password {
+    value     = "nevermod"
+    temporary = false
+  }
+}
+
+resource "keycloak_user" "maybemod" {
+  realm_id       = keycloak_realm.leddit.id
+  username       = "maybemod"
+  email          = "maybemod@leddit.local"
+  first_name     = "Maybe"
+  last_name      = "Mod"
+  enabled        = true
+  email_verified = true
+
+  initial_password {
+    value     = "maybemod"
     temporary = false
   }
 }
