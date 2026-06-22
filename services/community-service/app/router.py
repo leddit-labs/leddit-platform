@@ -56,7 +56,6 @@ def create_community(
             "user_id": user_id,
         },
     )
-
     publish_event(
         "community.created",
         {
@@ -86,7 +85,17 @@ def update_community(
             extra={"community_id": community_id, "user_id": user_id},
         )
         raise HTTPException(403, "Only moderators can update a community")
-    return repository.update(db, community, body)
+    community_updated = repository.update(db, community, body)
+    publish_event(
+        "community_updated",
+        {
+            "u_id": community_updated.id,
+            "name": community_updated.name,
+            "description": community_updated.description,
+            "created_by": community_updated.created_by,
+        },
+    )
+    return community_updated
 
 
 @router.delete("/{community_id}", status_code=204)
@@ -95,8 +104,8 @@ def delete_community(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user),
 ):
-    community = repository.get_by_id(db, community_id)
-    if not community:
+    community_deleted = repository.get_by_id(db, community_id)
+    if not community_deleted:
         raise HTTPException(404, "Community not found")
     if not repository.is_owner(db, community_id, user_id):
         logger.warning(
@@ -104,7 +113,8 @@ def delete_community(
             extra={"community_id": community_id, "user_id": user_id},
         )
         raise HTTPException(403, "Only the owner can delete a community")
-    repository.delete(db, community)
+    repository.delete(db, community_deleted)
+    publish_event("community_deleted", {"u_id": community_deleted.id})
 
 
 # ----------------------------------------------------
