@@ -227,6 +227,7 @@ class TestUserProfilePostKarma:
     @pytest.mark.parametrize("post_karma", [
         "not_a_number",
         123.45,
+        None,
     ])
     def test_invalid_post_karma(self, post_karma):
         with pytest.raises(ValidationError):
@@ -245,7 +246,7 @@ class TestUserProfilePostKarma:
     # -------------------- VALID VALUES --------------------
     @pytest.mark.parametrize("post_karma", [
         -999999,
-        -1000
+        -1000,
         -2,
         -1,
         0,
@@ -274,6 +275,7 @@ class TestUserProfileCommentKarma:
     @pytest.mark.parametrize("comment_karma", [
         "not_a_number",
         123.45,
+        None,
     ])
     def test_invalid_comment_karma(self, comment_karma):
         with pytest.raises(ValidationError):
@@ -321,6 +323,7 @@ class TestUserProfileTotalKarma:
     @pytest.mark.parametrize("total_karma", [
         "not_a_number",
         123.45,
+        None,
     ])
     def test_invalid_total_karma(self, total_karma):
         with pytest.raises(ValidationError):
