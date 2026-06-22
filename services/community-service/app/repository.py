@@ -8,7 +8,7 @@ from app.schemas import CommunityCreate, CommunityUpdate, RuleIn, RuleUpdate
 # ----------------
 def create(db: Session, data: CommunityCreate, created_by: str) -> Community:
     community = Community(
-        id=uuid4().hex[:12],
+        id=str(uuid4()),
         name=data.name,
         description=data.description,
         created_by=created_by,
