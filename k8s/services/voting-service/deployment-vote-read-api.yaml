@@ -37,9 +37,6 @@ spec:
           envFrom:
             - secretRef:
                 name: vote-db-secret
-          env:
-            - name: RABBITMQ_PORT
-              value: "5672"
           resources:
             requests:
               cpu: 100m
