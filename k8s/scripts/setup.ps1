@@ -11,17 +11,20 @@ $ProjectRoot = Split-Path -Parent $K8sDir
 Write-Host "==> Starting minikube..."
 minikube start --cpus=4 --memory=8192 --driver=docker --addons=metrics-server,ingress
 
-Write-Host "==> Pointing Docker to minikube..."
-minikube docker-env --shell powershell | Invoke-Expression
+#Write-Host "==> Pointing Docker to minikube..."
+#minikube docker-env --shell powershell | Invoke-Expression
 
 Write-Host "==> Building service images..."
-docker build -t leddit/post-service:latest      "$ProjectRoot\services\post-service"
-docker build -t leddit/comment-service:latest   "$ProjectRoot\services\comment-service"
-docker build -t leddit/community-service:latest "$ProjectRoot\services\community-service"
-docker build -t leddit/user-service:latest      "$ProjectRoot\services\user-service"
-docker build -t leddit/voting-service:latest    "$ProjectRoot\services\voting-service"
-docker build -t leddit/integrity-service:latest "$ProjectRoot\services\integrity-service"
-docker build -t leddit/frontend:latest          "$ProjectRoot\frontend"
+minikube image build -t leddit/post-service:latest "$ProjectRoot\services\post-service"
+minikube image build -t leddit/comment-service:latest "$ProjectRoot\services\comment-service"
+minikube image build -t leddit/community-service:latest "$ProjectRoot\services\community-service"
+minikube image build -t leddit/user-service:latest "$ProjectRoot\services\user-service"
+minikube image build -t leddit/voting-service:latest "$ProjectRoot\services\voting-service"
+minikube image build -t leddit/integrity-service:latest "$ProjectRoot\services\integrity-service"
+minikube image build -t leddit/frontend:latest "$ProjectRoot\frontend"
+
+Write-Host "==> Checking minikube images..."
+minikube image ls | Select-String "leddit"
 
 Write-Host "==> Creating namespace..."
 kubectl apply -f "$K8sDir\namespace"
