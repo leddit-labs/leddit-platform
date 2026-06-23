@@ -15,6 +15,12 @@ dependencies = [
     "strawberry-graphql[fastapi]>=0.319.0",
     "uvicorn>=0.46.0",
 ]
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "testcontainers>=4.0",
+    "httpx>=0.27",
+]
 
 [tool.uv.sources]
 leddit-logging = { git = "https://github.com/leddit-labs/leddit-platform.git", subdirectory = "leddit-logging", rev = "v0.1.0" }
