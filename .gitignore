@@ -21,3 +21,4 @@ __pycache__
 
 # The crap
 .egg
+keycloak/terraform/terraform.tfvars
