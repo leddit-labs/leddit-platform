@@ -366,6 +366,69 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "graphQL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Reponse is array\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.data.posts).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              "pm.test(\"Each post has title\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    jsonData.data.posts.forEach(function (post) {\r",
+              "        pm.expect(post).to.have.property(\"title\");\r",
+              "        pm.expect(post.title).to.be.a(\"string\").and.to.not.be.empty;\r",
+              "    });\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Each post has content\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    jsonData.data.posts.forEach(function (post) {\r",
+              "        pm.expect(post).to.have.property(\"content\");\r",
+              "        pm.expect(post.content).to.be.a(\"string\").and.to.not.be.empty;\r",
+              "    });\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query {\r\n  posts(page: 1, size: 5) {\r\n    #uId\r\n    title\r\n    content\r\n    #communityId\r\n    #authorId\r\n    #createdAt\r\n  }\r\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/graphql",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [
