@@ -1,0 +1,18 @@
+services:
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test   # <-- this tells Docker to build the test stage
+    container_name: post-service-integration-tests
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: uv run --extra test pytest -q tests/integration
+    environment:
+      PYTHONUNBUFFERED: 1
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    profiles:
+      - test
