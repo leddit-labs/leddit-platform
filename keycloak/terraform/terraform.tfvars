@@ -1,5 +1,6 @@
-# terraform/terraform.tfvars
 environment           = "development"
 keycloak_admin_user   = "admin"
 keycloak_admin_password = "admin"
 leddit_frontend_url   = "http://localhost:3000"
+github_client_id     = "CLIENT-ID-GOES-HERE"
+github_client_secret = "CLIENT-SECRET-GOES-HERE"
