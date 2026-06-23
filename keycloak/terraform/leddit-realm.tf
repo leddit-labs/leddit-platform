@@ -52,7 +52,7 @@ resource "keycloak_openid_user_property_protocol_mapper" "sub_mapper" {
   realm_id            = keycloak_realm.leddit.id
   client_scope_id     = data.keycloak_openid_client_scope.profile.id
   name                = "sub"
-  user_property       = "id" # This is the correct property name
+  user_property       = "id"
   claim_name          = "sub"
   add_to_access_token = true
   add_to_id_token     = true
@@ -178,4 +178,46 @@ resource "keycloak_user" "maybemod" {
     value     = "maybemod"
     temporary = false
   }
+}
+
+# ============================================
+# Realm Roles
+# ============================================
+resource "keycloak_role" "user_role" {
+  realm_id    = keycloak_realm.leddit.id
+  name        = "user"
+  description = "Standard Leddit user role"
+}
+
+# ============================================
+# GitHub Identity Provider
+# ============================================
+resource "keycloak_oidc_identity_provider" "github" {
+  realm                         = keycloak_realm.leddit.id
+  alias                         = "github"
+  display_name                  = "GitHub"
+  provider_id                   = "github"
+  enabled                       = true
+  store_token                   = false
+  trust_email                   = true
+  first_broker_login_flow_alias = "first broker login"
+  sync_mode                     = "IMPORT"
+
+  client_id     = var.github_client_id
+  client_secret = var.github_client_secret
+  default_scopes = "user:email"
+
+  authorization_url = "https://github.com/login/oauth/authorize"
+  token_url         = "https://github.com/login/oauth/access_token"
+  user_info_url     = "https://api.github.com/user"
+}
+
+# ============================================
+# GitHub Role Mapper
+# ============================================
+resource "keycloak_hardcoded_role_identity_provider_mapper" "github_user_role" {
+  realm                   = keycloak_realm.leddit.id
+  name                    = "github-user-role-mapper"
+  identity_provider_alias = keycloak_oidc_identity_provider.github.alias
+  role                    = keycloak_role.user_role.name
 }

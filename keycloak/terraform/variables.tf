@@ -33,3 +33,17 @@ variable "leddit_frontend_url" {
   type        = string
   default     = "http://localhost:3000"
 }
+
+variable "github_client_id" {
+  description = "GitHub OAuth App client ID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "github_client_secret" {
+  description = "GitHub OAuth App client secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
