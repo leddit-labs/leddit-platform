@@ -14,7 +14,7 @@ echo "Keycloak is ready"
 echo "Applying Terraform configuration"
 cd terraform
 terraform init
-terraform apply -auto-approve
+terraform apply -input=false -auto-approve
 
 echo ""
 echo "Done!"
