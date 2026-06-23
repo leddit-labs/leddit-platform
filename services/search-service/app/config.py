@@ -4,10 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = "Search Service"
 
-    rabbitmq_host: str = "rabbitmq"
+    rabbitmq_host: str
     rabbitmq_port: int = 5672
-    rabbitmq_user: str = "guest"
-    rabbitmq_pass: str = "guest"
+    rabbitmq_user: str
+    rabbitmq_pass: str
 
     elasticsearch_url: str = "http://elasticsearch:9200"
     elasticsearch_post_index: str = "leddit-posts"

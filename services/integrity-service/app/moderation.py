@@ -18,17 +18,36 @@ Otherwise, accept the post. Controversial opinions and profanity alone are NOT g
 Respond with EXACTLY one word: ACCEPTED or DENIED
 """
 
-client = OpenAI(
-    api_key=settings.deepseek_api_key,
-    base_url=settings.deepseek_base_url,
-)
+client = None
+
+
+def _get_client() -> OpenAI | None:
+    global client
+
+    if client is not None:
+        return client
+
+    if not settings.deepseek_api_key:
+        return None
+
+    client = OpenAI(
+        api_key=settings.deepseek_api_key,
+        base_url=settings.deepseek_base_url,
+    )
+    return client
 
 def moderate_post(title: str, content: str | None) -> bool:
     """Return True if the post is accepted, False if denied."""
     user_message = f"Title: {title}\n\nContent: {content or '(no content)'}"
+
+    api_client = _get_client()
+
+    if api_client is None:
+        print("No DeepSeek API key configured. Defaulting to accepted")
+        return True
  
     try:
-        response = client.chat.completions.create(
+        response = api_client.chat.completions.create(
             model=settings.deepseek_model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
