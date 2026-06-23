@@ -81,7 +81,7 @@ def _wait_for_search_result(title_query: str, post_id: str, *, expected_present:
                 post_id,
                 exc_info=True,
             )
-        time.sleep(10)
+        time.sleep(5)
 
     raise AssertionError(
         f"Timed out waiting for search result presence={expected_present} for post {post_id}"
@@ -93,8 +93,8 @@ def _wait_for_dependencies() -> None:
     _wait_until_ready(f"{API_GATEWAY_URL}/api/v1/search/posts?q=title")
     _wait_until_ready(ELASTICSEARCH_URL)
     _wait_until_ready(RABBITMQ_MGMT_URL, headers={"Authorization": f"Basic {_basic_auth('guest', 'guest')}"})
-    print("All dependencies are ready waiting 1 minute before starting tests...")
-    time.sleep(60)
+    print("All dependencies are ready waiting 30 seconds before starting tests...")
+    time.sleep(30)
 
 
 def _basic_auth(username: str, password: str) -> str:
