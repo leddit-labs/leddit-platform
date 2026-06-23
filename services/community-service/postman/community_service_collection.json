@@ -1,0 +1,1128 @@
+{
+  "info": {
+    "_postman_id": "6ff2647d-46b5-471c-9967-e4c9afef687e",
+    "name": "Community Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29383084",
+    "_collection_link": "https://go.postman.co/collection/29383084-6ff2647d-46b5-471c-9967-e4c9afef687e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Access Token - Testuser",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access_token);",
+                  "pm.test('Got access token', () => {",
+                  "    pm.expect(json.access_token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "leddit-api"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "xg79IufwMOiaA4kQq5CtJJZH26oztka9"
+                },
+                {
+                  "key": "username",
+                  "value": "testuser"
+                },
+                {
+                  "key": "password",
+                  "value": "leddit123"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}",
+              "host": [
+                "{{keycloak_url}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Access Token - Notmod",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access_token);",
+                  "pm.test('Got access token', () => {",
+                  "    pm.expect(json.access_token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "leddit-api"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "xg79IufwMOiaA4kQq5CtJJZH26oztka9"
+                },
+                {
+                  "key": "username",
+                  "value": "not_mod"
+                },
+                {
+                  "key": "password",
+                  "value": "not_mod"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}",
+              "host": [
+                "{{keycloak_url}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Communities",
+      "item": [
+        {
+          "name": "Create Community",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('community_id', json.id);",
+                  "}",
+                  "pm.test('Community created', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(json.id).to.be.a('string');",
+                  "    pm.expect(json.name).to.be.a('string');",
+                  "    pm.expect(json.created_by).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"My_community\",\n    \"description\": \"This is mine\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Communities",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns array', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}",
+              "host": [
+                "{{base_url}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Community",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns community', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.eql(pm.collectionVariables.get('community_id'));",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Community (owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Community updated', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().description).to.eql('Updated description');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Community (not moderator - expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Forbidden for non-moderator', () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "REPLACE_WITH_OTHER_USER_TOKEN",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"description\": \"Should not work\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Community (owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Community deleted', () => {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Moderators",
+      "item": [
+        {
+          "name": "List Moderators",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns moderator list', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    pm.expect(json.length).to.be.at.least(1);",
+                  "    pm.expect(json[0].role).to.eql('owner');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}/moderators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}",
+                "moderators"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Moderator (owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Moderator added', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.role).to.eql('moderator');",
+                  "    pm.collectionVariables.set('moderator_user_id', json.user_id);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": \"67b46475-24ac-440f-a7d2-55a001362ca4\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{community_id}}/moderators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{community_id}}",
+                "moderators"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Moderator (not owner - expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Forbidden for non-owner', () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": \"another-user-id\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/moderators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "moderators"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Moderator (owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Moderator removed', () => {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/moderators/{{moderator_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "moderators",
+                "{{moderator_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Owner (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Cannot remove owner', () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/moderators/REPLACE_WITH_OWNER_USER_ID",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "moderators",
+                "REPLACE_WITH_OWNER_USER_ID"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Duplicate Moderator (expect 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conflict on duplicate', () => {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": \"{{moderator_user_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/moderators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "moderators"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rules",
+      "item": [
+        {
+          "name": "Add Rule (moderator/owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"rule_id\", json.id);",
+                  "}",
+                  "pm.test(\"Rule created\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(json.id).to.be.a(\"string\");",
+                  "    pm.expect(json.title).to.eql(\"No spam\");",
+                  "    pm.expect(json.text).to.eql(\"Do not post spam content\");",
+                  "    pm.expect(json.order).to.be.a(\"number\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"No spam\",\n    \"text\": \"Do not post spam content\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Rule (not moderator - expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Forbidden for non-moderator\", () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "REPLACE_WITH_OTHER_USER_TOKEN",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Unauthorized rule\",\n    \"text\": \"Should not work\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Rules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns rules array\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"array\");",
+                  "    pm.expect(json.length).to.be.at.least(1);",
+                  "    pm.expect(json[0].order).to.eql(1);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rule (moderator/owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Rule updated\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.title).to.eql(\"No spam allowed\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"No spam allowed\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules/{{rule_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules",
+                "{{rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rule (not moderator - expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Forbidden for non-moderator\", () => {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "REPLACE_WITH_OTHER_USER_TOKEN",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Should not work\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules/{{rule_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules",
+                "{{rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rule (not found - expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Rule not found\", () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Does not exist\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules/nonexistent_id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules",
+                "nonexistent_id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Rule (moderator/owner)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Rule deleted\", () => {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules/{{rule_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules",
+                "{{rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Rule (not found - expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Rule not found\", () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/communities/{{community_id}}/rules/nonexistent_id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "communities",
+                "{{community_id}}",
+                "rules",
+                "nonexistent_id"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:9080/api/v1"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "community_id",
+      "value": ""
+    },
+    {
+      "key": "moderator_user_id",
+      "value": ""
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:9080"
+    },
+    {
+      "key": "testuser_id",
+      "value": ""
+    },
+    {
+      "key": "notmod_id",
+      "value": ""
+    },
+    {
+      "key": "rule_id",
+      "value": ""
+    },
+    {
+      "key": "client_secret",
+      "value": "leddit-api-dev-secret-123"
+    },
+    {
+      "key": "client_id",
+      "value": "leddit-api"
+    }
+  ]
+}
