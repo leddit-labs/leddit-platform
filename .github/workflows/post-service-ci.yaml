@@ -34,8 +34,8 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      #- name: Run tests
-      #  run: uv run pytest
+      - name: Run unit tests
+        run: uv run pytest
 
       - name: Build image
         run: docker build -t post-service:${{ github.sha }} .
@@ -46,5 +46,5 @@ jobs:
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: post-service-image
+          name: post-service-image-${{ github.sha }}
           path: services/post-service/post-service.tar
