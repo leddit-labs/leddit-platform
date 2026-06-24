@@ -1,0 +1,53 @@
+name: Comment Service CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "services/comment-service/**"
+
+  pull_request:
+    paths:
+      - "services/comment-service/**"
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: services/comment-service
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra test
+
+      - name: Run unit tests
+        run: uv run pytest tests/unit
+
+      - name: Run integration tests
+        run: uv run pytest tests/integration
+
+      - name: Build image
+        run: docker build -t comment-service:${{ github.sha }} .
+
+      - name: Save image
+        run: docker save comment-service:${{ github.sha }} -o comment-service.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: comment-service-image-${{ github.sha }}
+          path: services/comment-service/comment-service.tar
