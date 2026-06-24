@@ -4,31 +4,31 @@
 	"values": [
 		{
 			"key": "base_url",
-			"value": "",
+			"value": "http://localhost:9080/api/v1",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "commentId",
-			"value": "",
+			"value": "6",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "content",
-			"value": "",
+			"value": "hello from postman",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "content_updated",
-			"value": "",
+			"value": "hello from postman - updated",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "postId",
-			"value": "",
+			"value": "post-1",
 			"type": "default",
 			"enabled": true
 		}
