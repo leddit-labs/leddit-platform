@@ -38,7 +38,7 @@ jobs:
         run: uv run pytest tests/unit
 
       - name: Run integration tests
-        run: uv run pytest tests/integration
+        run: docker compose -f docker-compose.test.yml run --rm integration-tests
 
       - name: Build image
         run: docker build -t comment-service:${{ github.sha }} .
