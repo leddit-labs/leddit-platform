@@ -4,6 +4,7 @@ import logging
 import time
 from typing import Callable
 
+from app.cache import invalidate
 from app.messaging import get_consumer_channel
 from app.search_index import (
     ensure_post_index,
@@ -63,7 +64,9 @@ def _reject_dlq(channel, method):
         channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
 
-def _process_with_retries(channel, method, handler: Callable[[dict], None], event: dict):
+def _process_with_retries(
+    channel, method, handler: Callable[[dict], None], event: dict
+):
     for attempt in range(1, MAX_MESSAGE_RETRIES + 1):
         try:
             handler(event)
@@ -88,7 +91,11 @@ def _on_message(channel, method, properties, body):
         return
 
     if routing_key in ("post_created", "post_updated"):
-        _process_with_retries(channel, method, lambda ev: index_post(ev), event)
+        def _idx(ev: dict):
+            index_post(ev)
+            invalidate("posts")
+
+        _process_with_retries(channel, method, _idx, event)
         return
 
     if routing_key == "post_deleted":
@@ -97,12 +104,17 @@ def _on_message(channel, method, properties, body):
             if not u_id:
                 raise ValueError("missing u_id")
             delete_post(u_id)
+            invalidate("posts")
 
         _process_with_retries(channel, method, _del, event)
         return
 
     if routing_key in ("community_created", "community_updated"):
-        _process_with_retries(channel, method, lambda ev: index_community(ev), event)
+        def _cidx(ev: dict):
+            index_community(ev)
+            invalidate("communities")
+
+        _process_with_retries(channel, method, _cidx, event)
         return
 
     if routing_key == "community_deleted":
@@ -111,6 +123,7 @@ def _on_message(channel, method, properties, body):
             if not u_id:
                 raise ValueError("missing u_id")
             delete_community(u_id)
+            invalidate("communities")
 
         _process_with_retries(channel, method, _cdel, event)
         return

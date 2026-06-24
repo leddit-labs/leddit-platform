@@ -31,9 +31,15 @@ services:
     volumes:
       - search_es_data:/usr/share/elasticsearch/data
 
+  redis:
+    image: redis:7-alpine
+    networks:
+      - leddit-network
+
 volumes:
   search_es_data:
 
 networks:
   leddit-network:
     external: true
+
