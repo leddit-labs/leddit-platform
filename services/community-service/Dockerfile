@@ -2,6 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+COPY alembic.ini .
+COPY alembic ./alembic
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
   procps \
