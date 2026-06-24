@@ -6,6 +6,7 @@ import pytest
 from neo4j import GraphDatabase
 from fastapi.testclient import TestClient
 from testcontainers.neo4j import Neo4jContainer
+from testcontainers.core.waiting_utils import wait_for_logs
 
 SERVICE_ROOT = Path(__file__).resolve().parents[2]
 if str(SERVICE_ROOT) not in sys.path:
@@ -21,7 +22,11 @@ class DockerFriendlyNeo4jContainer(Neo4jContainer):
 
 @pytest.fixture(scope="session")
 def neo4j_container() -> Neo4jContainer:
-    with DockerFriendlyNeo4jContainer(image="neo4j:5.22") as container:
+    container = (
+        DockerFriendlyNeo4jContainer(image="neo4j:5.22")
+        .waiting_for(wait_for_logs("Started."))
+    )
+    with container as container:
         yield container
 
 
