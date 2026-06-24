@@ -23,7 +23,7 @@ services:
     labels:
       logging_job: "leddit"
     container_name: comment-service
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/app
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/app
     depends_on:
       neo4j_database:
         condition: service_healthy
