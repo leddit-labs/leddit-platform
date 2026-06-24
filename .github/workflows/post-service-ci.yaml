@@ -35,7 +35,7 @@ jobs:
         run: uv sync
 
       - name: Run unit tests
-        run: uv run pytest
+        run: uv run pytest test/unit
 
       - name: Build image
         run: docker build -t post-service:${{ github.sha }} .
