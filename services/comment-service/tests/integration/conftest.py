@@ -20,21 +20,9 @@ class DockerFriendlyNeo4jContainer(Neo4jContainer):
 
 
 @pytest.fixture(scope="session")
-def neo4j_container():
-    container = DockerFriendlyNeo4jContainer(image="neo4j:5.22")
-
-    try:
-        container.start()
-
-        print("Host:", container.get_container_host_ip())
-        print("Bolt port:", container.get_exposed_port(7687))
-        print("URL:", container.get_connection_url())
-
+def neo4j_container() -> Neo4jContainer:
+    with DockerFriendlyNeo4jContainer(image="neo4j:5.22") as container:
         yield container
-
-    finally:
-        print(container.get_logs())
-        container.stop()
 
 
 @pytest.fixture(scope="session")
