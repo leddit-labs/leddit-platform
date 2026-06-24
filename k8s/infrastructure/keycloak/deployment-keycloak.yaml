@@ -47,6 +47,8 @@ spec:
                   key: KEYCLOAK_ADMIN_PASSWORD
             - name: KC_HEALTH_ENABLED
               value: "true"
+            - name: KC_HOSTNAME_URL
+              value: "http://localhost:8080"
             - name: KC_HOSTNAME_STRICT
               value: "false"
             - name: KC_HTTP_ENABLED

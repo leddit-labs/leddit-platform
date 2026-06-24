@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-terraform
+  namespace: leddit
+  labels:
+    app: keycloak-terraform
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: terraform
+          image: hashicorp/terraform:latest
+          workingDir: /workspace
+          command:
+            - sh
+            - -c
+            - |
+              # Copy Terraform files to writable directory
+              cp /terraform-files/*.tf /workspace/
+
+              echo "Waiting for Keycloak to be ready..."
+              until wget -qO- http://keycloak.leddit.svc.cluster.local:9000/health 2>/dev/null; do
+                echo "Waiting for Keycloak..."
+                sleep 5
+              done
+              echo "Keycloak ready. Applying Terraform..."
+              terraform init
+              terraform apply -auto-approve
+              echo "Terraform applied successfully."
+          env:
+            - name: TF_VAR_keycloak_url
+              value: "http://keycloak.leddit.svc.cluster.local:8080"
+            - name: TF_VAR_keycloak_admin_user
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: KEYCLOAK_ADMIN
+            - name: TF_VAR_keycloak_admin_password
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: TF_VAR_github_client_id
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: GITHUB_CLIENT_ID
+                  optional: true
+            - name: TF_VAR_github_client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: GITHUB_CLIENT_SECRET
+                  optional: true
+          volumeMounts:
+            - name: terraform-files
+              mountPath: /terraform-files
+              readOnly: true
+            - name: terraform-workdir
+              mountPath: /workspace
+      volumes:
+        - name: terraform-files
+          configMap:
+            name: keycloak-terraform-config
+        - name: terraform-workdir
+          emptyDir: {}

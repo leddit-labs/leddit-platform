@@ -49,6 +49,19 @@ kubectl -n leddit create configmap vote-init-sql `
   --from-file=init-db.sql="$ProjectRoot\services\voting-service\app\db\init-db.sql" `
   --dry-run=client -o yaml | kubectl apply -f -
 
+Write-Host "==> Creating terraform configmap..."
+kubectl -n leddit delete configmap keycloak-terraform-config --ignore-not-found 2>$null
+kubectl -n leddit create configmap keycloak-terraform-config `
+  --from-file=main.tf="$ProjectRoot\keycloak\terraform\main.tf" `
+  --from-file=variables.tf="$ProjectRoot\keycloak\terraform\variables.tf" `
+  --from-file=leddit-realm.tf="$ProjectRoot\keycloak\terraform\leddit-realm.tf"
+
+if (-not $?) {
+  Write-Host "FATAL: Failed to create keycloak-terraform-config"
+  exit 1
+}
+Write-Host "   keycloak-terraform-config created"
+
 Write-Host "==> Installing KEDA (for queue-based autoscaling)..."
 helm repo add kedacore https://kedacore.github.io/charts 2>$null
 helm repo update
@@ -63,6 +76,13 @@ kubectl apply -f "$K8sDir\infrastructure\apisix"
 Write-Host "==> Waiting for infrastructure..."
 kubectl -n leddit wait --for=condition=ready pod -l app=rabbitmq --timeout=120s
 kubectl -n leddit wait --for=condition=ready pod -l app=keycloak-db --timeout=60s
+
+Write-Host "==> Running Keycloak Terraform job..."
+kubectl -n leddit wait --for=condition=ready pod -l app=keycloak --timeout=300s
+kubectl apply -f "$K8sDir\infrastructure\keycloak\job-terraform.yaml"
+Write-Host "   Waiting for Terraform job to complete..."
+kubectl -n leddit wait --for=condition=complete job/keycloak-terraform --timeout=300s
+Write-Host "   Terraform job completed."
 
 Write-Host "==> Deploying application services..."
 kubectl apply -f "$K8sDir\services\post-service"
