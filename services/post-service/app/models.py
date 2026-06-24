@@ -20,3 +20,4 @@ class Post(Base):
 
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     deleted_at = Column(DateTime, nullable=True)
+    status = Column(String, nullable=False, default="pending")

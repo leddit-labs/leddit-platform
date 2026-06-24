@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     rabbitmq_host: str
     rabbitmq_port: int = 5672
+    rabbitmq_user: str
+    rabbitmq_pass: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
