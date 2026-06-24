@@ -25,7 +25,7 @@ services:
     command: pytest -q tests/integration
     environment:
       PYTHONUNBUFFERED: 1
-      TESTCONTAINERS_HOST_OVERRIDE: localhost
+      TESTCONTAINERS_HOST_OVERRIDE: 127.0.0.1 #localhost
       TESTCONTAINERS_RYUK_DISABLED: "true"
     profiles:
       - test
