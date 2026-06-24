@@ -1,0 +1,50 @@
+name: Post Service CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "services/post-service/**"
+
+  pull_request:
+    paths:
+      - "services/post-service/**"
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: services/post-service
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync
+
+      #- name: Run tests
+      #  run: uv run pytest
+
+      - name: Build image
+        run: docker build -t post-service:${{ github.sha }} .
+
+      - name: Save image
+        run: docker save post-service:${{ github.sha }} -o post-service.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-service-image
+          path: services/post-service/post-service.tar
