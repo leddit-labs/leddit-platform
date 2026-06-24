@@ -16,7 +16,7 @@ from app.main import app
 
 class DockerFriendlyNeo4jContainer(Neo4jContainer):
     def get_container_host_ip(self) -> str:
-        return os.environ.get("TESTCONTAINERS_HOST_OVERRIDE", "host.docker.internal")
+        return os.environ.get("TESTCONTAINERS_HOST_OVERRIDE", "localhost")
 
 
 @pytest.fixture(scope="session")
