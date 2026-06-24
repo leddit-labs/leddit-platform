@@ -29,6 +29,18 @@ docker build -t leddit/frontend:latest "$PROJECT_ROOT/frontend"
 echo "==> Creating namespace..."
 kubectl apply -f "$K8S_DIR/namespace/"
 
+kubectl -n leddit delete configmap keycloak-terraform-config --ignore-not-found 2>/dev/null || true
+kubectl -n leddit create configmap keycloak-terraform-config \
+  --from-file=main.tf="$PROJECT_ROOT/keycloak/terraform/main.tf" \
+  --from-file=variables.tf="$PROJECT_ROOT/keycloak/terraform/variables.tf" \
+  --from-file=leddit-realm.tf="$PROJECT_ROOT/keycloak/terraform/leddit-realm.tf"
+
+if ! kubectl -n leddit get configmap keycloak-terraform-config > /dev/null 2>&1; then
+  echo "FATAL: Failed to create keycloak-terraform-config"
+  exit 1
+fi
+echo "   keycloak-terraform-config created"
+
 echo "==> Creating configmaps from source files..."
 kubectl -n leddit create configmap monitoring-config \
   --from-file=loki-config.yml="$PROJECT_ROOT/monitoring/loki-config.yml" \
@@ -63,6 +75,15 @@ kubectl apply -f "$K8S_DIR/infrastructure/apisix/"
 echo "==> Waiting for infrastructure to be ready..."
 kubectl -n leddit wait --for=condition=ready pod -l app=rabbitmq --timeout=120s || true
 kubectl -n leddit wait --for=condition=ready pod -l app=keycloak-db --timeout=60s || true
+
+echo "==> Running Keycloak Terraform job..."
+kubectl -n leddit wait --for=condition=ready pod -l app=keycloak --timeout=300s || {
+  echo "WARNING: Keycloak not ready after 300s, running Terraform anyway..."
+}
+kubectl apply -f "$K8S_DIR/infrastructure/keycloak/job-terraform.yaml"
+echo "   Waiting for Terraform job to complete..."
+kubectl -n leddit wait --for=condition=complete job/keycloak-terraform --timeout=300s
+echo "   Terraform job completed."
 
 echo "==> Deploying application services..."
 kubectl apply -f "$K8S_DIR/services/post-service/"

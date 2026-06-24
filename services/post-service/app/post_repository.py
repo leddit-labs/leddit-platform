@@ -21,6 +21,7 @@ class PostRepository:
         return (
             db.query(Post)
             .filter(Post.deleted_at.is_(None)) # don't return deleted posts - filter these out
+            .filter(Post.status == "accepted")
             .order_by(Post.created_at.desc())
             .offset(skip)
             .limit(limit)
