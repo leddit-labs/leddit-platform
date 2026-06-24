@@ -1,0 +1,299 @@
+asyncapi: 3.0.0
+
+info:
+  title: Leddit Event Bus API
+  version: 1.0.0
+  description: |
+    AsyncAPI documentation for all RabbitMQ message communication
+    between Leddit microservices.
+
+servers:
+  rabbitmq:
+    host: rabbitmq:5672
+    protocol: amqp
+    description: RabbitMQ broker
+
+defaultContentType: application/json
+
+
+channels:
+
+  post.created:
+    address: post_created
+    messages:
+      postCreated:
+        $ref: "#/components/messages/PostCreated"
+
+
+  post.updated:
+    address: post_updated
+    messages:
+      postUpdated:
+        $ref: "#/components/messages/PostUpdated"
+
+
+  post.deleted:
+    address: post_deleted
+    messages:
+      postDeleted:
+        $ref: "#/components/messages/PostDeleted"
+
+
+  post.accepted:
+    address: post_accepted
+    messages:
+      postAccepted:
+        $ref: "#/components/messages/PostAccepted"
+
+
+  post.denied:
+    address: post_denied
+    messages:
+      postDenied:
+        $ref: "#/components/messages/PostDenied"
+
+
+  community.created:
+    address: community.created
+    messages:
+      communityCreated:
+        $ref: "#/components/messages/CommunityCreated"
+
+
+  community.updated:
+    address: community_updated
+    messages:
+      communityUpdated:
+        $ref: "#/components/messages/CommunityUpdated"
+
+
+  community.deleted:
+    address: community_deleted
+    messages:
+      communityDeleted:
+        $ref: "#/components/messages/CommunityDeleted"
+
+
+  vote.post.changed:
+    address: vote.post.changed
+    messages:
+      votePostChanged:
+        $ref: "#/components/messages/VotePostChanged"
+
+
+  vote.comment.changed:
+    address: vote.comment.changed
+    messages:
+      voteCommentChanged:
+        $ref: "#/components/messages/VoteCommentChanged"
+
+
+
+operations:
+
+  publishPostCreated:
+    action: send
+    channel:
+      $ref: "#/channels/post.created"
+    summary: Post service publishes new posts
+
+
+  consumePostCreated:
+    action: receive
+    channel:
+      $ref: "#/channels/post.created"
+    summary: Integrity service consumes created posts
+
+
+  publishCommunityCreated:
+    action: send
+    channel:
+      $ref: "#/channels/community.created"
+
+
+  consumeVotePostChanged:
+    action: receive
+    channel:
+      $ref: "#/channels/vote.post.changed"
+
+
+  consumeVoteCommentChanged:
+    action: receive
+    channel:
+      $ref: "#/channels/vote.comment.changed"
+
+
+
+components:
+
+  messages:
+
+
+    PostCreated:
+      name: post_created
+      title: Post Created Event
+      payload:
+        $ref: "#/components/schemas/PostCreatedPayload"
+
+
+    PostUpdated:
+      name: post_updated
+      title: Post Updated Event
+      payload:
+        $ref: "#/components/schemas/PostCreatedPayload"
+
+
+    PostDeleted:
+      name: post_deleted
+      title: Post Deleted Event
+      payload:
+        type: object
+        properties:
+          u_id:
+            type: string
+            format: uuid
+
+
+    PostAccepted:
+      name: post_accepted
+      payload:
+        type: object
+        properties:
+          u_id:
+            type: string
+          community_id:
+            type: string
+          author_id:
+            type: string
+          title:
+            type: string
+
+
+    PostDenied:
+      name: post_denied
+      payload:
+        type: object
+        properties:
+          u_id:
+            type: string
+          community_id:
+            type: string
+          author_id:
+            type: string
+          title:
+            type: string
+
+
+
+    CommunityCreated:
+      name: community.created
+      payload:
+        $ref: "#/components/schemas/CommunityPayload"
+
+
+    CommunityUpdated:
+      name: community_updated
+      payload:
+        $ref: "#/components/schemas/CommunityPayload"
+
+
+    CommunityDeleted:
+      name: community_deleted
+      payload:
+        type: object
+        properties:
+          u_id:
+            type: string
+
+
+
+    VotePostChanged:
+      name: vote.post.changed
+      payload:
+        type: object
+        required:
+          - post_id
+          - user_id
+          - new_value
+        properties:
+          post_id:
+            type: string
+          user_id:
+            type: string
+          new_value:
+            type: integer
+
+
+
+    VoteCommentChanged:
+      name: vote.comment.changed
+      payload:
+        type: object
+        required:
+          - comment_id
+          - user_id
+          - new_value
+        properties:
+          comment_id:
+            type: string
+          user_id:
+            type: string
+          new_value:
+            type: integer
+
+
+
+
+  schemas:
+
+
+    PostCreatedPayload:
+
+      type: object
+
+      required:
+        - u_id
+        - community_id
+        - author_id
+        - title
+        - content
+
+      properties:
+
+        u_id:
+          type: string
+          format: uuid
+
+        community_id:
+          type: string
+          format: uuid
+
+        author_id:
+          type: string
+          format: uuid
+
+        title:
+          type: string
+
+        content:
+          type: string
+
+
+
+    CommunityPayload:
+
+      type: object
+
+      properties:
+
+        community_id:
+          type: string
+
+        name:
+          type: string
+
+        description:
+          type: string
+
+        created_by:
+          type: string
