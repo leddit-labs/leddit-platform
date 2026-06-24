@@ -13,7 +13,6 @@ app = FastAPI(title="Leddit Comment Service", version="0.1.0")
 app.add_middleware(RequestLoggingMiddleware)
 app.include_router(comment_router)
 
-
 @app.on_event("startup")
 def on_startup() -> None:
     init_db()
