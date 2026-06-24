@@ -1,0 +1,20 @@
+[project]
+name = "comment-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi>=0.138.0",
+  "httpx>=0.28.1",
+  "leddit-logging>=0.1.0",
+  "neo4j>=6.2.0",
+  "pydantic>=2.13.4",
+  "pytest>=9.1.1",
+  "pytest-cov>=7.1.0",
+  "testcontainers[neo4j]>=4.14.2",
+  "uvicorn[standard]>=0.49.0",
+]
+
+[tool.uv.sources]
+leddit-logging = { git = "https://github.com/leddit-labs/leddit-platform.git", subdirectory = "leddit-logging", rev = "v0.1.0" }

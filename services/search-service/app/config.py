@@ -13,7 +13,12 @@ class Settings(BaseSettings):
     elasticsearch_post_index: str = "leddit-posts"
     elasticsearch_community_index: str = "leddit-communities"
 
+    redis_url: str = "redis://redis:6379/0"
+    cache_enabled: bool = True
+    cache_ttl_seconds: int = 30
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()
+
