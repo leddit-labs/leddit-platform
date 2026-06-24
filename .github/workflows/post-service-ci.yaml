@@ -32,10 +32,10 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --extra test
 
       - name: Run unit tests
-        run: uv run pytest test/unit
+        run: uv run pytest tests/unit
 
       - name: Build image
         run: docker build -t post-service:${{ github.sha }} .
