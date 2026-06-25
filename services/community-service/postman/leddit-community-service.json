@@ -206,11 +206,11 @@
     },
     {
       "key": "user_id",
-      "value": ""
+      "value": "db890e3a-913b-483c-a21d-2a838003fecb"
     },
     {
       "key": "keycloak_url",
-      "value": ""
+      "value": "http://localhost:9080"
     }
   ]
 }
