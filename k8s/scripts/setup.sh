@@ -14,8 +14,10 @@ echo "==> Starting minikube..."
 minikube start --cpus=4 --memory=8192 --driver=docker \
   --addons=metrics-server,ingress 2>/dev/null || true
 
-echo "==> Pointing Docker to minikube..."
-eval $(minikube docker-env --shell bash)
+echo "==> Docker env before unset:"
+env | grep -E '^(DOCKER_HOST|DOCKER_TLS_VERIFY|DOCKER_CERT_PATH|MINIKUBE_ACTIVE_DOCKERD)=' || true
+
+eval "$(minikube docker-env --unset)"
 
 echo "==> Building service images..."
 docker build -t leddit/post-service:latest "$PROJECT_ROOT/services/post-service"
@@ -35,7 +37,7 @@ kubectl -n leddit create configmap keycloak-terraform-config \
   --from-file=variables.tf="$PROJECT_ROOT/keycloak/terraform/variables.tf" \
   --from-file=leddit-realm.tf="$PROJECT_ROOT/keycloak/terraform/leddit-realm.tf"
 
-if ! kubectl -n leddit get configmap keycloak-terraform-config > /dev/null 2>&1; then
+if ! kubectl -n leddit get configmap keycloak-terraform-config >/dev/null 2>&1; then
   echo "FATAL: Failed to create keycloak-terraform-config"
   exit 1
 fi
