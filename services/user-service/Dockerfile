@@ -12,6 +12,8 @@ COPY pyproject.toml uv.lock ./
 RUN pip install --no-cache-dir uv \
   && uv sync --no-cache
 
+COPY app ./app
+
 EXPOSE 8001
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]

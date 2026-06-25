@@ -9,7 +9,7 @@ $K8sDir = Split-Path -Parent $ScriptDir
 $ProjectRoot = Split-Path -Parent $K8sDir
 
 Write-Host "==> Starting minikube..."
-minikube start --cpus=4 --memory=8192 --driver=docker --addons=metrics-server,ingress
+minikube start --cpus=4 --memory=7000 --driver=docker --addons=metrics-server,ingress
 
 #Write-Host "==> Pointing Docker to minikube..."
 #minikube docker-env --shell powershell | Invoke-Expression

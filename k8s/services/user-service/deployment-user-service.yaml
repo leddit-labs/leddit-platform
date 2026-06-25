@@ -20,7 +20,7 @@ spec:
         - name: user-service
           image: leddit/user-service:latest
           imagePullPolicy: Never
-          command: [uvicorn, app.main:app, --host, "0.0.0.0", --port, "8001"]
+          command: [uv, run, uvicorn, app.main:app, --host, "0.0.0.0", --port, "8001"]
           ports:
             - containerPort: 8001
           env:

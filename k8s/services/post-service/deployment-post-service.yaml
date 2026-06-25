@@ -30,6 +30,10 @@ spec:
               value: rabbitmq
             - name: RABBITMQ_PORT
               value: "5672"
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASS
+              value: guest
           resources:
             requests:
               cpu: 100m
