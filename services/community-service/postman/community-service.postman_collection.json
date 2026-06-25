@@ -1,0 +1,1254 @@
+{
+  "info": {
+    "name": "Leddit - Community Service",
+    "_postman_id": "b2f1c0de-0000-4a00-9000-leddit000001",
+    "description": "Postman collection for the community-service FastAPI app, routed through the APISIX gateway (port 9080).\n\nEverything goes through the gateway:\n- API calls hit `{{baseUrl}}` = {{gatewayUrl}}/api/v1, e.g. /api/v1/communities, which APISIX rewrites to /communities on community-service:8000.\n- Reads (GET) are public; writes (POST/PUT/PATCH/DELETE) are protected at the gateway by the openid-connect plugin (bearer_only, client `leddit-api`). A valid token is forwarded upstream, so the service's own owner/mod checks still apply.\n- Tokens come from the `/auth/*` route (rewrites to Keycloak's token endpoint), public client `leddit-frontend`, password grant. The service reads the JWT `sub` claim as the user id.\n- /health and /metrics are NOT routed by the gateway, so they use `{{serviceUrl}}` directly.\n\nRun order: folder 0 (Auth) first, then 2 (Communities) to create the community and capture `communityId`, then 3/4/5. Runs top-to-bottom in the Collection Runner too.\n\nMOD vs NON-MOD:\n- testuser creates the community and is therefore its owner (a mod).\n- nevermod is never added, so it exercises the 403 paths.\n- maybemod gets promoted to moderator mid-run, then removed.\n\nTo bypass the gateway and hit the service directly, override `baseUrl` to http://localhost:8002 and point the Auth requests at Keycloak on :8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 - Auth (get tokens)",
+      "description": "Run these first. Each saves an access token + the user's `sub` (the id the community-service reads from the JWT).",
+      "item": [
+        {
+          "name": "Login as MOD (testuser)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayUrl}}/auth/protocol/openid-connect/token",
+              "host": [
+                "{{gatewayUrl}}"
+              ],
+              "path": [
+                "auth",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{clientId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{modUser}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{modPass}}",
+                  "type": "text"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid profile",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "ROPC (password) grant via the APISIX `/auth/*` route, which rewrites to Keycloak's `/realms/leddit/protocol/openid-connect/token`. Uses the public `leddit-frontend` client (direct access grants enabled). The audience mapper puts `leddit-api` in the token so the gateway's bearer_only validation accepts it. Saves the access token and the decoded `sub` claim."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function decodeJwt(token){",
+                  "  let p = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');",
+                  "  while (p.length % 4) p += '=';",
+                  "  return JSON.parse(atob(p));",
+                  "}",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('access_token present', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.collectionVariables.set('modToken', j.access_token);",
+                  "pm.collectionVariables.set('modUserId', decodeJwt(j.access_token).sub);",
+                  "console.log('modUserId =', decodeJwt(j.access_token).sub);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as NON-MOD (nevermod)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayUrl}}/auth/protocol/openid-connect/token",
+              "host": [
+                "{{gatewayUrl}}"
+              ],
+              "path": [
+                "auth",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{clientId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{nonModUser}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{nonModPass}}",
+                  "type": "text"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid profile",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "ROPC (password) grant via the APISIX `/auth/*` route, which rewrites to Keycloak's `/realms/leddit/protocol/openid-connect/token`. Uses the public `leddit-frontend` client (direct access grants enabled). The audience mapper puts `leddit-api` in the token so the gateway's bearer_only validation accepts it. Saves the access token and the decoded `sub` claim."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function decodeJwt(token){",
+                  "  let p = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');",
+                  "  while (p.length % 4) p += '=';",
+                  "  return JSON.parse(atob(p));",
+                  "}",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('access_token present', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.collectionVariables.set('nonModToken', j.access_token);",
+                  "pm.collectionVariables.set('nonModUserId', decodeJwt(j.access_token).sub);",
+                  "console.log('nonModUserId =', decodeJwt(j.access_token).sub);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as maybemod (promotion target)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gatewayUrl}}/auth/protocol/openid-connect/token",
+              "host": [
+                "{{gatewayUrl}}"
+              ],
+              "path": [
+                "auth",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{clientId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{maybeModUser}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{maybeModPass}}",
+                  "type": "text"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid profile",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "ROPC (password) grant via the APISIX `/auth/*` route, which rewrites to Keycloak's `/realms/leddit/protocol/openid-connect/token`. Uses the public `leddit-frontend` client (direct access grants enabled). The audience mapper puts `leddit-api` in the token so the gateway's bearer_only validation accepts it. Saves the access token and the decoded `sub` claim."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function decodeJwt(token){",
+                  "  let p = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');",
+                  "  while (p.length % 4) p += '=';",
+                  "  return JSON.parse(atob(p));",
+                  "}",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('access_token present', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.collectionVariables.set('maybeModToken', j.access_token);",
+                  "pm.collectionVariables.set('maybeModUserId', decodeJwt(j.access_token).sub);",
+                  "console.log('maybeModUserId =', decodeJwt(j.access_token).sub);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 - Health & Metrics",
+      "description": "These are NOT exposed through the APISIX gateway (no route matches /health or /metrics), so they hit the service directly via {{serviceUrl}}.",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{serviceUrl}}/health",
+              "host": [
+                "{{serviceUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('status ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{serviceUrl}}/metrics",
+              "host": [
+                "{{serviceUrl}}"
+              ],
+              "path": [
+                "metrics"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 - Communities",
+      "item": [
+        {
+          "name": "Create Community (MOD) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"testcommunity\",\n  \"description\": \"Created by the postman collection\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "The creator is automatically recorded as `owner` in community_moderators."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('communityId', j.id);",
+                  "pm.test('owner is mod user', () => pm.expect(j.created_by).to.eql(pm.collectionVariables.get('modUserId')));",
+                  "console.log('communityId =', j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Communities (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Community by id (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Community (MOD) -> 200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description by owner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Community (NON-MOD) -> 403",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{nonModToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"I should not be allowed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "nevermod is not a moderator of this community -> expect 403."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Community duplicate name -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"testcommunity\",\n  \"description\": \"dup\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Community no auth -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"noauthcommunity\",\n  \"description\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 - Moderators",
+      "item": [
+        {
+          "name": "List Moderators (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/moderators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "moderators"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Moderator as NON-MOD -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/moderators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "moderators"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{nonModToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{maybeModUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Only the owner may add moderators."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Moderator (OWNER adds maybemod) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/moderators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "moderators"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{maybeModUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "maybemod is now a moderator and can edit rules/community."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('role is moderator', () => pm.expect(pm.response.json().role).to.eql('moderator'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "maybemod can now Update Community -> 200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{maybeModToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Edited by a promoted moderator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove Moderator (OWNER) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/moderators/{{maybeModUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "moderators",
+                "{{maybeModUserId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 - Rules",
+      "item": [
+        {
+          "name": "Add Rule (MOD) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "rules"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Be civil\",\n  \"text\": \"No personal attacks.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ruleId', pm.response.json().id);",
+                  "console.log('ruleId =', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Rule (NON-MOD) -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "rules"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{nonModToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sneaky\",\n  \"text\": \"Should be blocked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Rules (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "rules"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Rule (MOD, PATCH) -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/rules/{{ruleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "rules",
+                "{{ruleId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"No personal attacks or harassment.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Rule (MOD) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}/rules/{{ruleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}",
+                "rules",
+                "{{ruleId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 - Cleanup",
+      "item": [
+        {
+          "name": "Delete Community as NON-OWNER -> 403",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{nonModToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Only the owner can delete (a plain moderator cannot either)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Community (OWNER) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/communities/{{communityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "communities",
+                "{{communityId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{modToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:9080"
+    },
+    {
+      "key": "baseUrl",
+      "value": "{{gatewayUrl}}/api/v1"
+    },
+    {
+      "key": "serviceUrl",
+      "value": "http://localhost:8002"
+    },
+    {
+      "key": "clientId",
+      "value": "leddit-frontend"
+    },
+    {
+      "key": "modUser",
+      "value": "testuser"
+    },
+    {
+      "key": "modPass",
+      "value": "leddit123"
+    },
+    {
+      "key": "nonModUser",
+      "value": "nevermod"
+    },
+    {
+      "key": "nonModPass",
+      "value": "nevermod"
+    },
+    {
+      "key": "maybeModUser",
+      "value": "maybemod"
+    },
+    {
+      "key": "maybeModPass",
+      "value": "maybemod"
+    },
+    {
+      "key": "modToken",
+      "value": ""
+    },
+    {
+      "key": "nonModToken",
+      "value": ""
+    },
+    {
+      "key": "maybeModToken",
+      "value": ""
+    },
+    {
+      "key": "modUserId",
+      "value": ""
+    },
+    {
+      "key": "nonModUserId",
+      "value": ""
+    },
+    {
+      "key": "maybeModUserId",
+      "value": ""
+    },
+    {
+      "key": "communityId",
+      "value": ""
+    },
+    {
+      "key": "ruleId",
+      "value": ""
+    }
+  ]
+}
