@@ -66,6 +66,8 @@ services:
       POSTGRES_DB: posts_db
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
     networks:
       - leddit-test-network
 
